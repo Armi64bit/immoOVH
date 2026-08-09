@@ -29,16 +29,22 @@ def _clean_host(value: str) -> str:
     return value
 
 
-ALLOWED_HOSTS = [
-    host
-    for host in (
-        _clean_host(h)
-        for h in os.environ.get(
-            "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,immoconnect.up.railway.app"
-        ).split(",")
-    )
-    if host
+_env_hosts = [
+    _clean_host(h)
+    for h in os.environ.get(
+        "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,immoconnect.up.railway.app"
+    ).split(",")
+    if _clean_host(h)
 ]
+
+# Always accept any Railway subdomain so health checks and the app work
+# regardless of the generated domain name.
+ALLOWED_HOSTS = list(
+    dict.fromkeys(
+        _env_hosts
+        + ["localhost", "127.0.0.1", ".up.railway.app", "immoconnect.tn", "www.immoconnect.tn"]
+    )
+)
 
 ROOT_URLCONF = "config.urls"
 
