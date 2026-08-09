@@ -1,4 +1,39 @@
+import { useState } from 'react'
+import { submitContact } from '../api'
+
 export default function Contact() {
+  const [formData, setFormData] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    subject: '',
+    message: '',
+  })
+  const [submitting, setSubmitting] = useState(false)
+  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null)
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+    setStatus(null)
+    try {
+      await submitContact(formData)
+      setStatus({ ok: true, text: 'Merci ! Votre message a bien été envoyé. Nous vous répondrons rapidement.' })
+      setFormData({ name: '', phone: '', email: '', subject: '', message: '' })
+    } catch (err) {
+      setStatus({ ok: false, text: err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.' })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
   return (
     <section className="page-panel contact-grid">
       <div className="contact-info">
@@ -29,34 +64,40 @@ export default function Contact() {
         </div>
       </div>
 
-      <form className="form-card contact-form">
+      <form className="form-card contact-form" onSubmit={handleSubmit}>
         <div className="form-row">
           <label>
             Nom et prénom *
-            <input type="text" placeholder="Votre nom" required />
+            <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Votre nom" required />
           </label>
           <label>
             Téléphone *
-            <input type="tel" placeholder="+216 XX XXX XXX" required />
+            <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="+216 XX XXX XXX" required />
           </label>
         </div>
 
         <label>
           Email
-          <input type="email" placeholder="Votre email" />
+          <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Votre email" />
         </label>
 
         <label>
           Sujet
-          <input type="text" placeholder="Sujet de votre message" />
+          <input type="text" name="subject" value={formData.subject} onChange={handleChange} placeholder="Sujet de votre message" />
         </label>
 
         <label>
           Message *
-          <textarea placeholder="Votre message" rows={6} required />
+          <textarea name="message" value={formData.message} onChange={handleChange} placeholder="Votre message" rows={6} required />
         </label>
 
-        <button type="submit">Envoyer</button>
+        {status && (
+          <p className={`form-status ${status.ok ? 'form-status-ok' : 'form-status-error'}`}>{status.text}</p>
+        )}
+
+        <button type="submit" disabled={submitting}>
+          {submitting ? 'ENVOI EN COURS…' : 'Envoyer'}
+        </button>
       </form>
     </section>
   )

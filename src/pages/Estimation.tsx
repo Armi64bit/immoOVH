@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { submitEstimation } from '../api'
 
 export default function Estimation() {
   const [formData, setFormData] = useState({
@@ -12,6 +13,8 @@ export default function Estimation() {
     knownFrom: '',
     comments: '',
   })
+  const [submitting, setSubmitting] = useState(false)
+  const [status, setStatus] = useState<{ ok: boolean; text: string } | null>(null)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -21,10 +24,29 @@ export default function Estimation() {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
-    // Handle form submission here
+    setSubmitting(true)
+    setStatus(null)
+    try {
+      await submitEstimation(formData)
+      setStatus({ ok: true, text: 'Merci ! Votre demande a bien été envoyée. Notre équipe vous contactera sous 48h.' })
+      setFormData({
+        name: '',
+        phone: '',
+        email: '',
+        zone: '',
+        propertyType: '',
+        transaction: 'Vente',
+        surface: '',
+        knownFrom: '',
+        comments: '',
+      })
+    } catch (err) {
+      setStatus({ ok: false, text: err instanceof Error ? err.message : 'Une erreur est survenue. Veuillez réessayer.' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -160,8 +182,12 @@ export default function Estimation() {
           />
         </div>
 
-        <button type="submit" className="btn btn-primary">
-          ENVOYER
+        {status && (
+          <p className={`form-status ${status.ok ? 'form-status-ok' : 'form-status-error'}`}>{status.text}</p>
+        )}
+
+        <button type="submit" className="btn btn-primary" disabled={submitting}>
+          {submitting ? 'ENVOI EN COURS…' : 'ENVOYER'}
         </button>
       </form>
     </section>

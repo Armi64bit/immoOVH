@@ -75,3 +75,58 @@ export async function fetchProperties(): Promise<PropertyItem[]> {
 
   throw new Error('Réponse API invalide')
 }
+
+export type EstimationSubmission = {
+  name: string
+  phone: string
+  email: string
+  zone: string
+  propertyType: string
+  transaction: string
+  surface: string
+  knownFrom: string
+  comments: string
+}
+
+export type ContactSubmission = {
+  name: string
+  phone: string
+  email: string
+  subject: string
+  message: string
+}
+
+async function postJson(url: string, body: unknown): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!response.ok) {
+    throw new Error(`Erreur API (${response.status})`)
+  }
+}
+
+export async function submitEstimation(data: EstimationSubmission): Promise<void> {
+  await postJson('/api/estimations/', {
+    name: data.name,
+    phone: data.phone,
+    email: data.email,
+    zone: data.zone,
+    property_type: data.propertyType,
+    transaction: data.transaction,
+    surface: data.surface,
+    known_from: data.knownFrom,
+    comments: data.comments,
+  })
+}
+
+export async function submitContact(data: ContactSubmission): Promise<void> {
+  await postJson('/api/contacts/', {
+    name: data.name,
+    phone: data.phone,
+    email: data.email,
+    subject: data.subject,
+    message: data.message,
+  })
+}

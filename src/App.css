@@ -1168,6 +1168,26 @@ width: 140%;
   padding: 0.95rem 1.4rem;
 }
 
+.form-status {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.form-status-ok {
+  background: rgba(46, 160, 67, 0.12);
+  border: 1px solid rgba(46, 160, 67, 0.4);
+  color: #2ea043;
+}
+
+.form-status-error {
+  background: rgba(248, 81, 73, 0.12);
+  border: 1px solid rgba(248, 81, 73, 0.4);
+  color: #f85149;
+}
+
 .estimation-form {
   padding: 2rem;
   display: flex;
