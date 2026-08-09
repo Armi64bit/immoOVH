@@ -7,10 +7,17 @@ from drf_spectacular.views import (
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from .views import PropertyViewSet, health
+from .views import (
+    ContactMessageViewSet,
+    EstimationRequestViewSet,
+    PropertyViewSet,
+    health,
+)
 
 router = DefaultRouter()
 router.register("properties", PropertyViewSet, basename="property")
+router.register("estimations", EstimationRequestViewSet, basename="estimation")
+router.register("contacts", ContactMessageViewSet, basename="contact")
 
 urlpatterns = [
     path("health/", health, name="health"),

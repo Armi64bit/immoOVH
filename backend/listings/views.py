@@ -6,8 +6,12 @@ from rest_framework import filters, viewsets
 from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAdminUser
 
 from .forms import PropertyForm
-from .models import Property
-from .serializers import PropertySerializer
+from .models import ContactMessage, EstimationRequest, Property
+from .serializers import (
+    ContactMessageSerializer,
+    EstimationRequestSerializer,
+    PropertySerializer,
+)
 
 
 class PropertyViewSet(viewsets.ModelViewSet):
@@ -56,6 +60,58 @@ class PropertyViewSet(viewsets.ModelViewSet):
 def health(request):
     """Liveness probe for Railway."""
     return JsonResponse({"status": "ok"})
+
+
+class EstimationRequestViewSet(viewsets.ModelViewSet):
+    """
+    Estimation requests from the public « Estimer mon bien » form.
+
+    - POST (create) is public so anyone can submit the form.
+    - Everything else requires an admin (JWT bearer token or admin session).
+    """
+
+    queryset = EstimationRequest.objects.all()
+    serializer_class = EstimationRequestSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name", "phone", "email", "zone", "comments"]
+    ordering_fields = [
+        "name",
+        "phone",
+        "email",
+        "zone",
+        "property_type",
+        "transaction",
+        "surface",
+        "known_from",
+        "created_at",
+    ]
+    ordering = ["-created_at"]
+
+    def get_permissions(self):
+        if self.action == "create":
+            return [AllowAny()]
+        return [IsAdminUser()]
+
+
+class ContactMessageViewSet(viewsets.ModelViewSet):
+    """
+    Contact messages from the public « Contact » form.
+
+    - POST (create) is public so anyone can submit the form.
+    - Everything else requires an admin (JWT bearer token or admin session).
+    """
+
+    queryset = ContactMessage.objects.all()
+    serializer_class = ContactMessageSerializer
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ["name", "phone", "email", "subject", "message"]
+    ordering_fields = ["name", "phone", "email", "subject", "created_at"]
+    ordering = ["-created_at"]
+
+    def get_permissions(self):
+        if self.action == "create":
+            return [AllowAny()]
+        return [IsAdminUser()]
 
 
 def landing(request):

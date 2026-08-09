@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Property
+from .models import ContactMessage, EstimationRequest, Property
 
 
 @admin.register(Property)
@@ -92,3 +92,35 @@ class PropertyAdmin(admin.ModelAdmin):
 admin.site.site_header = "Administration ImmoConnect"
 admin.site.site_title = "ImmoConnect Admin"
 admin.site.index_title = "Gestion des biens immobiliers"
+
+
+@admin.register(EstimationRequest)
+class EstimationRequestAdmin(admin.ModelAdmin):
+    list_display = [
+        "name",
+        "phone",
+        "email",
+        "zone",
+        "property_type",
+        "transaction",
+        "surface",
+        "known_from",
+        "created_at",
+    ]
+    list_filter = ["transaction", "property_type", "zone", "known_from"]
+    search_fields = ["name", "phone", "email", "zone", "comments"]
+    list_per_page = 25
+    ordering = ["-created_at"]
+    date_hierarchy = "created_at"
+    readonly_fields = ["created_at"]
+
+
+@admin.register(ContactMessage)
+class ContactMessageAdmin(admin.ModelAdmin):
+    list_display = ["name", "phone", "email", "subject", "created_at"]
+    list_filter = ["created_at"]
+    search_fields = ["name", "phone", "email", "subject", "message"]
+    list_per_page = 25
+    ordering = ["-created_at"]
+    date_hierarchy = "created_at"
+    readonly_fields = ["created_at"]

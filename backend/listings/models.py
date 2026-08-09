@@ -93,3 +93,77 @@ class Property(models.Model):
 
     def __str__(self) -> str:
         return f"{self.reference} — {self.title}"
+
+
+class EstimationRequest(models.Model):
+    """Demande envoyée via le formulaire « Estimer mon bien »."""
+
+    TRANSACTION_CHOICES = [
+        ("Vente", "Vente"),
+        ("Location", "Location"),
+    ]
+    PROPERTY_TYPE_CHOICES = [
+        ("villa", "Villa"),
+        ("appartement", "Appartement"),
+        ("terrain", "Terrain"),
+        ("riad", "Riad"),
+    ]
+    KNOWN_FROM_CHOICES = [
+        ("search", "Moteur de recherche"),
+        ("social", "Réseaux sociaux"),
+        ("referral", "Recommandation"),
+        ("other", "Autre"),
+    ]
+
+    name = models.CharField(max_length=128, verbose_name="Nom et prénom")
+    phone = models.CharField(max_length=32, verbose_name="Téléphone")
+    email = models.EmailField(blank=True, verbose_name="Email")
+    zone = models.CharField(max_length=128, verbose_name="Zone / quartier")
+    property_type = models.CharField(
+        max_length=32,
+        choices=PROPERTY_TYPE_CHOICES,
+        blank=True,
+        verbose_name="Type de bien",
+    )
+    transaction = models.CharField(
+        max_length=16,
+        choices=TRANSACTION_CHOICES,
+        default="Vente",
+        verbose_name="Transaction",
+    )
+    surface = models.CharField(max_length=32, blank=True, verbose_name="Surface (m²)")
+    known_from = models.CharField(
+        max_length=32,
+        choices=KNOWN_FROM_CHOICES,
+        blank=True,
+        verbose_name="Comment nous avez-vous connus ?",
+    )
+    comments = models.TextField(blank=True, verbose_name="Commentaires")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Reçu le")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Demande d'estimation"
+        verbose_name_plural = "Demandes d'estimation"
+
+    def __str__(self) -> str:
+        return f"{self.name} — {self.zone} ({self.created_at:%d/%m/%Y})"
+
+
+class ContactMessage(models.Model):
+    """Message envoyé via le formulaire de contact."""
+
+    name = models.CharField(max_length=128, verbose_name="Nom et prénom")
+    phone = models.CharField(max_length=32, verbose_name="Téléphone")
+    email = models.EmailField(blank=True, verbose_name="Email")
+    subject = models.CharField(max_length=255, blank=True, verbose_name="Sujet")
+    message = models.TextField(verbose_name="Message")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Reçu le")
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "Message de contact"
+        verbose_name_plural = "Messages de contact"
+
+    def __str__(self) -> str:
+        return f"{self.name} — {self.subject or self.message[:40]}"

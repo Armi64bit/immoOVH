@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Property
+from .models import ContactMessage, EstimationRequest, Property
 
 
 class PropertySerializer(serializers.ModelSerializer):
@@ -45,4 +45,38 @@ class PropertySerializer(serializers.ModelSerializer):
             url = obj.image.url
             return request.build_absolute_uri(url) if request else url
         return obj.image_url
+
+
+class EstimationRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EstimationRequest
+        fields = [
+            "id",
+            "name",
+            "phone",
+            "email",
+            "zone",
+            "property_type",
+            "transaction",
+            "surface",
+            "known_from",
+            "comments",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
+
+
+class ContactMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactMessage
+        fields = [
+            "id",
+            "name",
+            "phone",
+            "email",
+            "subject",
+            "message",
+            "created_at",
+        ]
+        read_only_fields = ["id", "created_at"]
 
