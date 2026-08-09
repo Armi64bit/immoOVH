@@ -3,7 +3,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from rest_framework import filters, viewsets
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAdminUser
 
 from .forms import PropertyForm
 from .models import Property
@@ -12,22 +12,34 @@ from .serializers import PropertySerializer
 
 class PropertyViewSet(viewsets.ModelViewSet):
     """
-    Admin-only CRUD for property listings.
+    Property listings API.
 
-    Authenticate with a JWT bearer token or a Django admin session.
+    - GET (list/retrieve) is public and returns only *published* properties,
+      so the public website can read them.
+    - All write operations (POST/PUT/PATCH/DELETE) require an admin
+      (JWT bearer token or Django admin session).
+
     Query params: `?search=`, `?type=`, `?status=`, `?location=`.
     """
 
-    queryset = Property.objects.all()
     serializer_class = PropertySerializer
-    permission_classes = [IsAdminUser]
     filter_backends = [filters.SearchFilter, filters.OrderingFilter]
     search_fields = ["title", "reference", "location", "price"]
     ordering_fields = ["price", "created_at", "updated_at", "location", "area"]
     ordering = ["-created_at"]
 
+    def get_permissions(self):
+        if self.request.method in SAFE_METHODS:
+            return [AllowAny()]
+        return [IsAdminUser()]
+
     def get_queryset(self):
-        queryset = super().get_queryset()
+        user = self.request.user
+        if user and user.is_staff:
+            queryset = Property.objects.all()
+        else:
+            queryset = Property.objects.filter(is_published=True)
+
         listing_type = self.request.query_params.get("type")
         status = self.request.query_params.get("status")
         location = self.request.query_params.get("location")

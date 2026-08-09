@@ -259,23 +259,23 @@ SEED = [
 
 
 class Command(BaseCommand):
-    help = "Load the 12 seed properties (idempotent, keyed by reference)."
+    help = (
+        "Seed the initial properties (creates only missing records, keyed by "
+        "reference; never overwrites existing entries, so admin edits are safe)."
+    )
 
     def handle(self, *args, **options):
-        created, updated = 0, 0
+        created = 0
         for item in SEED:
-            reference = item["reference"]
-            obj, was_created = Property.objects.update_or_create(
-                reference=reference,
+            _, was_created = Property.objects.get_or_create(
+                reference=item["reference"],
                 defaults=item,
             )
             if was_created:
                 created += 1
-            else:
-                updated += 1
         self.stdout.write(
             self.style.SUCCESS(
-                f"Done: {created} created, {updated} updated. "
+                f"Done: {created} created, skipped existing. "
                 f"Total properties: {Property.objects.count()}."
             )
         )
