@@ -9,6 +9,7 @@ from listings.views import (
     property_form_add_edit,
     property_form_delete,
     property_form_list,
+    property_set_status,
 )
 
 urlpatterns = [
@@ -20,6 +21,7 @@ urlpatterns = [
     path("biens/nouveau/", property_form_add_edit, name="property_form_add"),
     path("biens/<int:pk>/", property_form_add_edit, name="property_form_edit"),
     path("biens/<int:pk>/supprimer/", property_form_delete, name="property_form_delete"),
+    path("biens/<int:pk>/statut/", property_set_status, name="property_set_status"),
     # API, Swagger and health check
     path("api/", include("listings.urls")),
 ]

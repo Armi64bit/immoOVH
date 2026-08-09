@@ -59,7 +59,32 @@
   .muted-msg { color: var(--muted); font-size: 13px; padding: 20px; text-align: center; }
   .empty { color: var(--muted); padding: 26px; text-align: center; font-size: 14px; }
   .help-note { font-size: 12.5px; color: var(--muted); margin: -6px 0 14px; }
-  @media (max-width: 640px) { .toolbar { flex-direction: column; align-items: stretch; } }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, .55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+  .modal-overlay[hidden] { display: none; }
+  .modal { background: #fff; border-radius: 16px; max-width: 760px; width: 100%; max-height: 90vh; overflow: auto; box-shadow: 0 24px 60px rgba(0,0,0,.25); }
+  .modal-grid { display: grid; grid-template-columns: 300px 1fr; }
+  .modal-media img { width: 100%; height: 100%; object-fit: cover; min-height: 260px; display: block; }
+  .modal-media.placeholder { background: #eef1f4; }
+  .modal-info { padding: 20px 24px; }
+  .modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 50%; border: 0; background: rgba(255,255,255,.9); font-size: 18px; cursor: pointer; line-height: 1; }
+  .modal .meta { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .modal h3 { margin: 0 0 4px; font-size: 19px; }
+  .modal .loc { color: var(--muted); font-size: 13px; }
+  .modal .price { font-size: 22px; font-weight: 800; color: var(--brand); margin: 10px 0 14px; }
+  .modal .specs { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px 14px; margin: 0 0 14px; }
+  .modal .specs div { background: #f8faf9; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; }
+  .modal .specs .k { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
+  .modal .specs .v { font-size: 14px; font-weight: 700; margin-top: 2px; }
+  .modal .details { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  .modal-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
+  .modal-actions label { font-size: 12.5px; }
+  .modal-actions select { width: auto; min-width: 150px; }
+  .modal-actions .chk { display: flex; align-items: center; gap: 6px; font-weight: 600; }
+  .modal-actions .chk input { width: auto; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #15803d; color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 14px; z-index: 60; opacity: 0; transition: opacity .2s; }
+  .toast.show { opacity: 1; }
+  .prow { cursor: pointer; }
+  @media (max-width: 640px) { .toolbar { flex-direction: column; align-items: stretch; } .modal-grid { grid-template-columns: 1fr; } .modal-media img { min-height: 160px; } }
 </style>
 
 <div class="stats-grid">
@@ -119,14 +144,27 @@
       </thead>
       <tbody>
         {% for p in properties %}
-        <tr
+        <tr class="prow"
+          data-pk="{{ p.pk }}"
           data-ref="{{ p.reference }}"
           data-title="{{ p.title }}"
           data-type="{{ p.type }}"
           data-price="{{ p.price_sort_value }}"
+          data-price-label="{{ p.price }}"
           data-location="{{ p.location }}"
           data-status="{{ p.status }}"
           data-published="{{ p.is_published|yesno:'1,0' }}"
+          data-img="{{ p.image_display_url }}"
+          data-area="{{ p.area|default:'' }}"
+          data-rooms="{{ p.rooms|default:'' }}"
+          data-bedrooms="{{ p.bedrooms|default:'' }}"
+          data-bathrooms="{{ p.bathrooms|default:'' }}"
+          data-floor="{{ p.floor }}"
+          data-orientation="{{ p.orientation }}"
+          data-years="{{ p.years }}"
+          data-floortype="{{ p.floor_type }}"
+          data-features="{{ p.features|join:', ' }}"
+          data-details="{{ p.details }}"
         >
           <td>
             {% if p.image_display_url %}
@@ -140,10 +178,11 @@
           <td><span class="tag {% if p.type == 'À vendre' %}tag-vente{% else %}tag-location{% endif %}">{{ p.type }}</span></td>
           <td><strong>{{ p.price }}</strong></td>
           <td>{{ p.location }}</td>
-          <td><span class="tag {% if p.status == 'Disponible' %}tag-dispo{% elif p.status == 'Réservé' %}tag-reserve{% elif p.status == 'Vendu' %}tag-vendu{% elif p.status == 'Loué' %}tag-loue{% else %}tag-muted{% endif %}">{{ p.status }}</span></td>
-          <td><span class="tag {% if p.is_published %}tag-published{% else %}tag-unpublished{% endif %}">{% if p.is_published %}Oui{% else %}Non{% endif %}</span></td>
+          <td><span class="tag status-badge {% if p.status == 'Disponible' %}tag-dispo{% elif p.status == 'Réservé' %}tag-reserve{% elif p.status == 'Vendu' %}tag-vendu{% elif p.status == 'Loué' %}tag-loue{% else %}tag-muted{% endif %}">{{ p.status }}</span></td>
+          <td><span class="tag pub-badge {% if p.is_published %}tag-published{% else %}tag-unpublished{% endif %}">{% if p.is_published %}Oui{% else %}Non{% endif %}</span></td>
           <td>
             <div class="row-actions">
+              <button type="button" class="btn sm edit preview-btn">Aperçu</button>
               <a class="btn sm edit" href="{% url 'property_form_edit' p.pk %}">Modifier</a>
               <form method="post" action="{% url 'property_form_delete' p.pk %}" onsubmit="return confirm('Supprimer « {{ p.title }} » ?')">
                 {% csrf_token %}
@@ -161,18 +200,26 @@
 
   <div class="cards-grid" id="propCardsView">
     {% for p in properties %}
-    <article class="pcard" data-ref="{{ p.reference }}" data-type="{{ p.type }}" data-status="{{ p.status }}" data-title="{{ p.title }}" data-location="{{ p.location }}" data-price="{{ p.price_sort_value }}">
+    <article class="pcard prow" data-pk="{{ p.pk }}" data-ref="{{ p.reference }}" data-type="{{ p.type }}"
+      data-status="{{ p.status }}" data-title="{{ p.title }}" data-location="{{ p.location }}"
+      data-price="{{ p.price_sort_value }}" data-price-label="{{ p.price }}"
+      data-published="{{ p.is_published|yesno:'1,0' }}" data-img="{{ p.image_display_url }}"
+      data-area="{{ p.area|default:'' }}" data-rooms="{{ p.rooms|default:'' }}"
+      data-bedrooms="{{ p.bedrooms|default:'' }}" data-bathrooms="{{ p.bathrooms|default:'' }}"
+      data-floor="{{ p.floor }}" data-orientation="{{ p.orientation }}" data-years="{{ p.years }}"
+      data-floortype="{{ p.floor_type }}" data-features="{{ p.features|join:', ' }}" data-details="{{ p.details }}">
       {% if p.image_display_url %}<img src="{{ p.image_display_url }}" alt="" loading="lazy">{% endif %}
       <div class="body">
         <div class="meta">
           <span class="tag {% if p.type == 'À vendre' %}tag-vente{% else %}tag-location{% endif %}">{{ p.type }}</span>
-          <span class="tag {% if p.is_published %}tag-published{% else %}tag-unpublished{% endif %}">{% if p.is_published %}Publié{% else %}Masqué{% endif %}</span>
-          <span class="tag {% if p.status == 'Disponible' %}tag-dispo{% elif p.status == 'Réservé' %}tag-reserve{% elif p.status == 'Vendu' %}tag-vendu{% elif p.status == 'Loué' %}tag-loue{% else %}tag-muted{% endif %}">{{ p.status }}</span>
+          <span class="tag pub-badge {% if p.is_published %}tag-published{% else %}tag-unpublished{% endif %}">{% if p.is_published %}Publié{% else %}Masqué{% endif %}</span>
+          <span class="tag status-badge {% if p.status == 'Disponible' %}tag-dispo{% elif p.status == 'Réservé' %}tag-reserve{% elif p.status == 'Vendu' %}tag-vendu{% elif p.status == 'Loué' %}tag-loue{% else %}tag-muted{% endif %}">{{ p.status }}</span>
         </div>
         <div class="title">{{ p.title }}</div>
         <div class="loc">{{ p.location }} · {{ p.reference }}</div>
         <div class="price">{{ p.price }}</div>
         <div class="row-actions">
+          <button type="button" class="btn sm edit preview-btn">Aperçu</button>
           <a class="btn sm edit" href="{% url 'property_form_edit' p.pk %}">Modifier</a>
           <form method="post" action="{% url 'property_form_delete' p.pk %}" onsubmit="return confirm('Supprimer « {{ p.title }} » ?')">
             {% csrf_token %}
@@ -266,6 +313,40 @@
     </table>
   </div>
 </section>
+
+<!-- ============================ PREVIEW MODAL ============================ -->
+<div class="modal-overlay" id="previewModal" hidden>
+  <div class="modal" style="position:relative">
+    <button type="button" class="modal-close" id="pvClose" aria-label="Fermer">×</button>
+    <div class="modal-grid">
+      <div class="modal-media" id="pvMedia">
+        <img id="pvImg" src="" alt="">
+      </div>
+      <div class="modal-info">
+        <div class="meta" id="pvMeta"></div>
+        <h3 id="pvTitle"></h3>
+        <p class="loc" id="pvLoc"></p>
+        <div class="price" id="pvPrice"></div>
+        <div class="specs" id="pvSpecs"></div>
+        <p class="details" id="pvDetails"></p>
+        <div class="modal-actions">
+          <label>Statut
+            <select id="pvStatus">
+              <option value="Disponible">Disponible</option>
+              <option value="Réservé">Réservé</option>
+              <option value="Vendu">Vendu</option>
+              <option value="Loué">Loué</option>
+            </select>
+          </label>
+          <label class="chk"><input type="checkbox" id="pvPublished"> Publié sur le site</label>
+          <a id="pvEdit" class="btn sm edit" href="#">Modifier le bien</a>
+          <button type="button" class="btn sm" id="pvSave">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast">Statut mis à jour</div>
 
 <script>
 (function () {
@@ -399,6 +480,124 @@
       });
       th.insertAdjacentHTML('beforeend', ' <span class="arrow">' + (state.sortDir === 1 ? '▲' : '▼') + '</span>');
       applySort();
+    });
+  });
+
+  // --- Preview modal ---
+  var modal = document.getElementById('previewModal');
+  var currentPk = null;
+
+  function getCookie(name) {
+    var match = document.cookie.match(new RegExp('(^|; )' + name + '=([^;]*)'));
+    return match ? decodeURIComponent(match[2]) : '';
+  }
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function () { t.classList.remove('show'); }, 1800);
+  }
+  function statusClass(status) {
+    return { 'Disponible': 'tag-dispo', 'Réservé': 'tag-reserve', 'Vendu': 'tag-vendu', 'Loué': 'tag-loue' }[status] || 'tag-muted';
+  }
+  function spec(key, val, suffix) {
+    if (val === undefined || val === null || val === '') return '';
+    return '<div><div class="k">' + key + '</div><div class="v">' + val + (suffix || '') + '</div></div>';
+  }
+  function openPreview(el) {
+    var d = el.dataset;
+    currentPk = d.pk;
+    document.getElementById('pvTitle').textContent = d.title;
+    document.getElementById('pvLoc').textContent = d.location + ' · ' + d.ref;
+    document.getElementById('pvPrice').textContent = d.priceLabel;
+    document.getElementById('pvMeta').innerHTML =
+      '<span class="tag ' + (d.type === 'À vendre' ? 'tag-vente' : 'tag-location') + '">' + d.type + '</span>' +
+      '<span class="tag status-badge ' + statusClass(d.status) + '">' + d.status + '</span>';
+    var media = document.getElementById('pvMedia');
+    var img = document.getElementById('pvImg');
+    if (d.img) { img.src = d.img; media.classList.remove('placeholder'); } else { img.removeAttribute('src'); media.classList.add('placeholder'); }
+    var specs = '';
+    specs += spec('Surface', d.area, ' m²');
+    specs += spec('Pièces', d.rooms);
+    specs += spec('Chambres', d.bedrooms);
+    specs += spec('Salles de bain', d.bathrooms);
+    specs += spec('Étage', d.floor);
+    specs += spec('Orientation', d.orientation);
+    specs += spec('Âge', d.years);
+    specs += spec('Revêtement', d.floortype);
+    specs += spec('Référence', d.ref);
+    document.getElementById('pvSpecs').innerHTML = specs || '<div class="empty" style="grid-column:1/-1">Aucune spécification</div>';
+    document.getElementById('pvDetails').textContent = d.details || '';
+    document.getElementById('pvStatus').value = d.status;
+    document.getElementById('pvPublished').checked = d.published === '1';
+    var editLink = el.closest('.prow').querySelector('a[href*="/biens/"]');
+    document.getElementById('pvEdit').href = editLink ? editLink.getAttribute('href') : '#';
+    modal.hidden = false;
+  }
+  function refreshBadges(pk) {
+    var tr = document.querySelector('#propTable tr[data-pk="' + pk + '"]');
+    var card = document.querySelector('#propCardsView .pcard[data-pk="' + pk + '"]');
+    var status = tr ? tr.dataset.status : '';
+    var published = tr ? tr.dataset.published : '0';
+    [tr, card].forEach(function (root) {
+      if (!root) return;
+      var sb = root.querySelector('.status-badge');
+      if (sb) { sb.className = 'tag status-badge ' + statusClass(status); sb.textContent = status; }
+      var pb = root.querySelector('.pub-badge');
+      if (pb) { pb.className = 'tag pub-badge ' + (published === '1' ? 'tag-published' : 'tag-unpublished'); pb.textContent = published === '1' ? 'Oui' : 'Non'; }
+    });
+    var metaSb = document.querySelector('#pvMeta .status-badge');
+    if (metaSb) { metaSb.className = 'tag status-badge ' + statusClass(status); metaSb.textContent = status; }
+    applyFilters();
+  }
+  function savePreview() {
+    if (!currentPk) return;
+    var status = document.getElementById('pvStatus').value;
+    var published = document.getElementById('pvPublished').checked;
+    fetch('/biens/' + currentPk + '/statut/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+      body: JSON.stringify({ status: status, is_published: published })
+    }).then(function (r) { return r.json(); }).then(function (data) {
+      if (data.ok) {
+        var tr = document.querySelector('#propTable tr[data-pk="' + currentPk + '"]');
+        var card = document.querySelector('#propCardsView .pcard[data-pk="' + currentPk + '"]');
+        if (tr) { tr.dataset.status = data.status; tr.dataset.published = data.is_published ? '1' : '0'; }
+        if (card) { card.dataset.status = data.status; card.dataset.published = data.is_published ? '1' : '0'; }
+        refreshBadges(currentPk);
+        showToast('Statut mis à jour');
+      }
+    });
+  }
+  function closePreview() { modal.hidden = true; currentPk = null; }
+
+  document.getElementById('pvSave').addEventListener('click', savePreview);
+  document.getElementById('pvClose').addEventListener('click', closePreview);
+  document.getElementById('previewModal').addEventListener('click', function (e) { if (e.target === this) closePreview(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closePreview(); });
+
+  document.querySelectorAll('#propTable tbody').forEach(function (tbody) {
+    tbody.addEventListener('click', function (e) {
+      var target = e.target.closest('.prow');
+      if (!target) return;
+      if (e.target.closest('a, button, form, input')) return;
+      openPreview(target);
+    });
+  });
+  document.querySelectorAll('#propCardsView').forEach(function (cards) {
+    cards.addEventListener('click', function (e) {
+      var target = e.target.closest('.prow');
+      if (!target) return;
+      if (e.target.closest('a, button, form, input')) return;
+      openPreview(target);
+    });
+  });
+  document.querySelectorAll('.preview-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      openPreview(btn.closest('.prow'));
     });
   });
 })();

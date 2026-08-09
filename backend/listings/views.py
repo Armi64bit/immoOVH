@@ -2,8 +2,11 @@ from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from rest_framework import filters, viewsets
 from rest_framework.permissions import SAFE_METHODS, AllowAny, IsAdminUser
+
+import json
 
 from .forms import PropertyForm
 from .models import ContactMessage, EstimationRequest, Property
@@ -196,3 +199,28 @@ def property_form_delete(request, pk):
         property_obj.delete()
         messages.success(request, "Le bien a été supprimé.")
     return redirect("property_form_list")
+
+
+@staff_member_required
+@require_POST
+def property_set_status(request, pk):
+    """Quick status/publish update from the dashboard preview popup."""
+    property_obj = Property.objects.filter(pk=pk).first()
+    if not property_obj:
+        return JsonResponse({"ok": False, "error": "not_found"}, status=404)
+
+    try:
+        body = json.loads(request.body or b"{}")
+    except json.JSONDecodeError:
+        body = {}
+
+    status_value = body.get("status")
+    if status_value and status_value in dict(Property.STATUS_CHOICES):
+        property_obj.status = status_value
+    if "is_published" in body:
+        property_obj.is_published = bool(body["is_published"])
+
+    property_obj.save(update_fields=["status", "is_published"])
+    return JsonResponse(
+        {"ok": True, "status": property_obj.status, "is_published": property_obj.is_published}
+    )

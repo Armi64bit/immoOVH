@@ -2,7 +2,9 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
 
-from .models import ContactMessage, EstimationRequest
+import json
+
+from .models import ContactMessage, EstimationRequest, Property
 
 
 class FormSubmissionAPITests(TestCase):
@@ -74,3 +76,31 @@ class DashboardTests(TestCase):
         self.assertContains(response, "Tableau de bord")
         self.assertContains(response, "estimations")
         self.assertContains(response, "contacts")
+
+    def test_set_status_updates_property(self):
+        prop = Property.objects.create(
+            title="Test", type="À vendre", price="100 TND", location="Tunis",
+            reference="IC-TEST", status="Disponible", is_published=True,
+        )
+        self.client.force_login(self.user)
+        response = self.client.post(
+            "/biens/%d/statut/" % prop.pk,
+            data=json.dumps({"status": "Réservé", "is_published": False}),
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 200)
+        prop.refresh_from_db()
+        self.assertEqual(prop.status, "Réservé")
+        self.assertFalse(prop.is_published)
+
+    def test_set_status_requires_staff(self):
+        prop = Property.objects.create(
+            title="Test", type="À vendre", price="100 TND", location="Tunis",
+            reference="IC-TEST2", status="Disponible",
+        )
+        response = self.client.post(
+            "/biens/%d/statut/" % prop.pk,
+            data=json.dumps({"status": "Vendu"}),
+            content_type="application/json",
+        )
+        self.assertIn(response.status_code, (302, 403, 401))
