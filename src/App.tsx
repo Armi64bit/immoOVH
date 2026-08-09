@@ -10,13 +10,35 @@ import Estimation from './pages/Estimation'
 import Contact from './pages/Contact'
 import Recrutement from './pages/Recrutement'
 import PropertyDetail from './pages/PropertyDetail'
-import { navItems, featuredProperties, zones, whatsappNumbers } from './data/siteData'
+import { PropertiesProvider, useProperties } from './PropertiesContext'
+import { navItems, zones, whatsappNumbers } from './data/siteData'
 
-const venteProperties = featuredProperties.filter((property) => property.type === 'À vendre')
-const locationProperties = featuredProperties.filter((property) => property.type === 'À louer')
+function LoadingState() {
+  return (
+    <section className="page-panel">
+      <div className="page-intro">
+        <p className="eyebrow">Chargement</p>
+        <h2>Nos biens arrivent…</h2>
+      </div>
+    </section>
+  )
+}
+
+function ErrorState({ message }: { message: string }) {
+  return (
+    <section className="page-panel">
+      <div className="page-intro">
+        <p className="eyebrow">Erreur</p>
+        <h2>Impossible de charger les biens</h2>
+        <p>{message}</p>
+      </div>
+    </section>
+  )
+}
 
 function AppContent() {
   const navigate = useNavigate()
+  const { properties, vente, location, loading, error } = useProperties()
 
   const handleNavigate = (page: 'vente' | 'location' | 'estimation') => {
     const routes: Record<'vente' | 'location' | 'estimation', string> = {
@@ -38,16 +60,22 @@ function AppContent() {
       />
 
       <main className="main-content">
-        <Routes>
-          <Route path="/" element={<Home featuredProperties={featuredProperties} zones={zones} onNavigate={handleNavigate} />} />
-          <Route path="/Vente" element={<Listing title="Biens à vendre" subtitle="Explorez des propriétés soigneusement sélectionnées." properties={venteProperties} />} />
-          <Route path="/Location" element={<Listing title="Biens à louer" subtitle="Des locations élégantes pour un quotidien premium." properties={locationProperties} />} />
-          <Route path="/Carte" element={<MapPage properties={[...venteProperties, ...locationProperties]} />} />
-          <Route path="/Estimation" element={<Estimation />} />
-          <Route path="/Recrutement" element={<Recrutement />} />
-          <Route path="/Contact" element={<Contact />} />
-          <Route path="/property/:id" element={<PropertyDetail />} />
-        </Routes>
+        {loading ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState message={error} />
+        ) : (
+          <Routes>
+            <Route path="/" element={<Home featuredProperties={properties} zones={zones} onNavigate={handleNavigate} />} />
+            <Route path="/Vente" element={<Listing title="Biens à vendre" subtitle="Explorez des propriétés soigneusement sélectionnées." properties={vente} />} />
+            <Route path="/Location" element={<Listing title="Biens à louer" subtitle="Des locations élégantes pour un quotidien premium." properties={location} />} />
+            <Route path="/Carte" element={<MapPage properties={properties} />} />
+            <Route path="/Estimation" element={<Estimation />} />
+            <Route path="/Recrutement" element={<Recrutement />} />
+            <Route path="/Contact" element={<Contact />} />
+            <Route path="/property/:id" element={<PropertyDetail />} />
+          </Routes>
+        )}
       </main>
 
       <FloatingActions numbers={whatsappNumbers} />
@@ -59,7 +87,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <PropertiesProvider>
+        <AppContent />
+      </PropertiesProvider>
     </Router>
   )
 }

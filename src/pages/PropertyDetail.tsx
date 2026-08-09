@@ -1,11 +1,13 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { featuredProperties, whatsappNumbers } from '../data/siteData'
+import { whatsappNumbers } from '../data/siteData'
+import { useProperties } from '../PropertiesContext'
 import FloatingActions from '../components/FloatingActions'
 
 export default function PropertyDetail() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const property = featuredProperties.find((p) => p.reference === id)
+  const { properties } = useProperties()
+  const property = properties.find((p) => p.reference === id)
 
   if (!property) {
     return (
