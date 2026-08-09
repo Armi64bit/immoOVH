@@ -150,7 +150,7 @@ CORS_ALLOWED_ORIGINS = [
     origin.strip()
     for origin in os.environ.get(
         "CORS_ALLOWED_ORIGINS",
-        "https://www.immoconnect.tn,https://immoconnect.tn,https://immo-ovh-m23g-eight.vercel.app,http://localhost:5173,http://127.0.0.1:5173",
+        "https://www.immoconnect.tn,https://immoconnect.tn,http://www.immoconnect.tn,http://immoconnect.tn,https://immo-ovh-m23g-eight.vercel.app,http://localhost:5173,http://127.0.0.1:5173",
     ).split(",")
     if origin.strip()
 ]
