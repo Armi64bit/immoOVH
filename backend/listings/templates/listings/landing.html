@@ -1,0 +1,40 @@
+{% extends "listings/base.html" %}
+{% block title %}ImmoConnect — Accueil{% endblock %}
+{% block content %}
+  <div class="card">
+    <h1>Bienvenue sur le back-office ImmoConnect</h1>
+    <p class="muted">
+      Cet espace permet de gérer les biens immobiliers affichés sur
+      <strong>immoconnect.tn</strong> : ajouter, modifier, publier ou dépublier un bien.
+    </p>
+    <div class="actions">
+      {% if is_staff %}
+        <a class="btn" href="{% url 'property_form_add' %}">+ Ajouter un bien</a>
+        <a class="btn secondary" href="{% url 'property_form_list' %}">Voir les biens</a>
+        <a class="btn secondary" href="/admin/">Administration complète</a>
+        <a class="btn secondary" href="{% url 'swagger-ui' %}">Documentation API</a>
+      {% else %}
+        <a class="btn" href="/admin/login/">Se connecter</a>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>État des biens</h2>
+    <p>
+      <span class="badge published">Publiés : {{ published_count }}</span>
+      &nbsp;
+      <span class="badge">Total : {{ total_count }}</span>
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Comment ça marche ?</h2>
+    <ol>
+      <li><strong>Ajouter un bien</strong> : cliquez sur « Ajouter un bien », remplissez le formulaire (le plus important : titre, prix, localisation et photo).</li>
+      <li><strong>Publier</strong> : le bien est publié sur le site par défaut. Décochez « Publié » pour le masquer temporairement.</li>
+      <li><strong>Modifier / supprimer</strong> : depuis la liste des biens, utilisez les boutons Modifier ou Supprimer.</li>
+      <li><strong>API</strong> : pour les développeurs, la documentation de l'API se trouve dans « Documentation API ».</li>
+    </ol>
+  </div>
+{% endblock %}

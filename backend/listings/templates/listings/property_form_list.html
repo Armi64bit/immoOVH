@@ -1,0 +1,60 @@
+{% extends "listings/base.html" %}
+{% block title %}Biens — ImmoConnect{% endblock %}
+{% block content %}
+  <div class="card">
+    <h1>Liste des biens</h1>
+    <div class="actions" style="margin:0 0 16px;">
+      <a class="btn" href="{% url 'property_form_add' %}">+ Ajouter un bien</a>
+      <a class="btn secondary" href="/admin/">Administration complète</a>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>Photo</th>
+          <th>Réf.</th>
+          <th>Titre</th>
+          <th>Prix</th>
+          <th>Localisation</th>
+          <th>Statut</th>
+          <th>Publié</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in properties %}
+          <tr>
+            <td>
+              {% if p.image %}
+                <img class="thumb" src="{{ p.image.url }}" alt="" />
+              {% elif p.image_url %}
+                <img class="thumb" src="{{ p.image_url }}" alt="" />
+              {% else %}
+                —
+              {% endif %}
+            </td>
+            <td>{{ p.reference }}</td>
+            <td>{{ p.title }}</td>
+            <td>{{ p.price }}</td>
+            <td>{{ p.location }}</td>
+            <td>{{ p.status }}</td>
+            <td>
+              {% if p.is_published %}
+                <span class="badge published">Oui</span>
+              {% else %}
+                <span class="badge">Non</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{% url 'property_form_edit' p.pk %}">Modifier</a>
+              &nbsp;·&nbsp;
+              <a href="{% url 'property_form_delete' p.pk %}" style="color:var(--danger);"
+                 onclick="return confirm('Supprimer « {{ p.title }} » ?');">Supprimer</a>
+            </td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="8" class="muted">Aucun bien pour le moment.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% endblock %}

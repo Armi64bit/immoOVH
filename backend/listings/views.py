@@ -1,8 +1,11 @@
-from django.db.models import Q
+from django.contrib import messages
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from rest_framework import filters, viewsets
 from rest_framework.permissions import IsAdminUser
 
+from .forms import PropertyForm
 from .models import Property
 from .serializers import PropertySerializer
 
@@ -41,3 +44,63 @@ class PropertyViewSet(viewsets.ModelViewSet):
 def health(request):
     """Liveness probe for Railway."""
     return JsonResponse({"status": "ok"})
+
+
+def landing(request):
+    """Friendly welcome page explaining how to use the backend."""
+    published_count = Property.objects.filter(is_published=True).count()
+    total_count = Property.objects.count()
+    return render(
+        request,
+        "listings/landing.html",
+        {
+            "published_count": published_count,
+            "total_count": total_count,
+            "is_staff": request.user.is_staff if request.user.is_authenticated else False,
+        },
+    )
+
+
+@staff_member_required
+def property_form_list(request):
+    """List all properties with edit/delete actions."""
+    properties = Property.objects.all()
+    return render(
+        request,
+        "listings/property_form_list.html",
+        {"properties": properties},
+    )
+
+
+@staff_member_required
+def property_form_add_edit(request, pk=None):
+    """Add or edit a property via the simple form."""
+    instance = get_object_or_404(Property, pk=pk) if pk else None
+
+    if request.method == "POST":
+        form = PropertyForm(request.POST, request.FILES, instance=instance)
+        if form.is_valid():
+            form.save()
+            if instance:
+                messages.success(request, "Le bien a été mis à jour.")
+            else:
+                messages.success(request, "Le bien a été créé.")
+            return redirect("property_form_list")
+    else:
+        form = PropertyForm(instance=instance)
+
+    return render(
+        request,
+        "listings/property_form.html",
+        {"form": form, "instance": instance, "is_edit": instance is not None},
+    )
+
+
+@staff_member_required
+def property_form_delete(request, pk):
+    """Delete a property."""
+    property_obj = get_object_or_404(Property, pk=pk)
+    if request.method == "POST":
+        property_obj.delete()
+        messages.success(request, "Le bien a été supprimé.")
+    return redirect("property_form_list")

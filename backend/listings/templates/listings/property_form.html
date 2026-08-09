@@ -1,0 +1,28 @@
+{% extends "listings/base.html" %}
+{% block title %}{% if is_edit %}Modifier{% else %}Ajouter{% endif %} un bien — ImmoConnect{% endblock %}
+{% block content %}
+  <div class="card">
+    <h1>{% if is_edit %}Modifier le bien{% else %}Ajouter un bien{% endif %}</h1>
+    <p class="muted">
+      Remplissez les champs ci-dessous. Les champs avec une astérisque (*) sont obligatoires.
+    </p>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <div class="form-grid">
+        {% for field in form %}
+          <div class="{% if field.name in 'details,image_url,features,lat,lng' %}full{% endif %}">
+            <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="helptext">{{ field.help_text }}</div>{% endif %}
+            {% for error in field.errors %}<ul class="errorlist"><li>{{ error }}</li></ul>{% endfor %}
+          </div>
+        {% endfor %}
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn">{% if is_edit %}Enregistrer les modifications{% else %}Créer le bien{% endif %}</button>
+        <a class="btn secondary" href="{% url 'property_form_list' %}">Annuler</a>
+      </div>
+    </form>
+  </div>
+{% endblock %}
