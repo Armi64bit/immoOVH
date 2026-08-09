@@ -44,6 +44,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 APPEND_SLASH = True
 
 INSTALLED_APPS = [
+    "django_components",
+    # django_adminlte4 must precede django.contrib.admin so its admin
+    # template overrides win and the built-in admin is re-skinned.
+    "django_adminlte4",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -57,6 +61,8 @@ INSTALLED_APPS = [
     # Local
     "listings",
 ]
+
+COMPONENTS = {"dirs": [], "app_dirs": ["components"], "autodiscover": True}
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -74,16 +80,58 @@ TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
-        "APP_DIRS": True,
+        # django-components requires an explicit loaders list, so APP_DIRS=False.
+        "APP_DIRS": False,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django_adminlte4.context_processors.adminlte",
             ],
+            "loaders": [
+                (
+                    "django.template.loaders.cached.Loader",
+                    [
+                        "django.template.loaders.filesystem.Loader",
+                        "django.template.loaders.app_directories.Loader",
+                        "django_components.template_loader.Loader",
+                    ],
+                )
+            ],
+            "builtins": ["django_components.templatetags.component_tags"],
         },
     },
 ]
+
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "django_components.finders.ComponentsFileSystemFinder",
+]
+
+# ---------------------------------------------------------------------------
+# AdminLTE 4 (official Django integration) — themes django.contrib.admin
+# ---------------------------------------------------------------------------
+
+ADMINLTE = {
+    "title": "ImmoConnect Admin",
+    "logo": "<b>Immo</b>Connect",
+    "assets_mode": "static",
+    "sidebar_theme": "dark",
+    "menu": [
+        {"text": "Tableau de bord", "url": "/dashboard/", "icon": "bi bi-speedometer2"},
+        {"header": "GESTION"},
+        {"text": "Biens", "icon": "bi bi-building", "submenu": [
+            {"text": "Tous les biens", "url": "/admin/listings/property/", "icon": "bi bi-circle"},
+            {"text": "Ajouter un bien", "url": "/admin/listings/property/add/", "icon": "bi bi-circle"},
+        ]},
+        {"text": "Estimations", "url": "/admin/listings/estimationrequest/", "icon": "bi bi-clipboard-check"},
+        {"text": "Contacts", "url": "/admin/listings/contactmessage/", "icon": "bi bi-envelope"},
+        {"header": "LIENS"},
+        {"text": "Voir le site", "url": "https://www.immoconnect.tn", "icon": "bi bi-box-arrow-up-right", "target": "_blank"},
+    ],
+}
 
 # ---------------------------------------------------------------------------
 # Database (PostgreSQL, provided by Railway)

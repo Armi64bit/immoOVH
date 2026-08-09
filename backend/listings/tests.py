@@ -104,3 +104,12 @@ class DashboardTests(TestCase):
             content_type="application/json",
         )
         self.assertIn(response.status_code, (302, 403, 401))
+
+    def test_admin_index_renders_with_adminlte_theme(self):
+        user = get_user_model().objects.create_superuser(
+            username="boss", password="pw", email="boss@example.com"
+        )
+        self.client.force_login(user)
+        response = self.client.get("/admin/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "adminlte")
