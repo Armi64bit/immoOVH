@@ -21,9 +21,24 @@ SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "unsafe-dev-key-change-me")
 
 DEBUG = os.environ.get("DJANGO_DEBUG", "false").lower() in ("1", "true", "yes")
 
-ALLOWED_HOSTS = os.environ.get(
-    "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,immoconnect.up.railway.app"
-).split(",")
+def _clean_host(value: str) -> str:
+    """Strip scheme and path so ALLOWED_HOSTS accepts values with/without https://."""
+    value = value.strip().strip("/")
+    if "://" in value:
+        value = value.split("://", 1)[1].split("/", 1)[0]
+    return value
+
+
+ALLOWED_HOSTS = [
+    host
+    for host in (
+        _clean_host(h)
+        for h in os.environ.get(
+            "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,immoconnect.up.railway.app"
+        ).split(",")
+    )
+    if host
+]
 
 ROOT_URLCONF = "config.urls"
 
