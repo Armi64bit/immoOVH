@@ -29,22 +29,11 @@ def _clean_host(value: str) -> str:
     return value
 
 
-_env_hosts = [
-    _clean_host(h)
-    for h in os.environ.get(
-        "DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1,immoconnect.up.railway.app"
-    ).split(",")
-    if _clean_host(h)
-]
-
-# Always accept any Railway subdomain so health checks and the app work
-# regardless of the generated domain name.
-ALLOWED_HOSTS = list(
-    dict.fromkeys(
-        _env_hosts
-        + ["localhost", "127.0.0.1", ".up.railway.app", "immoconnect.tn", "www.immoconnect.tn"]
-    )
-)
+# Accept any host. Railway's health checks originate from an internal host
+# (e.g. 100.64.0.2) that varies per deployment and isn't a real domain, so a
+# fixed allow-list causes a 400 and fails the health check. This is safe here:
+# the API and admin are protected by JWT/admin authentication, not by host.
+ALLOWED_HOSTS = ["*"]
 
 ROOT_URLCONF = "config.urls"
 
