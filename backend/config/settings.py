@@ -209,7 +209,10 @@ SPECTACULAR_SETTINGS = {
 
 if not DEBUG:
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SSL_REDIRECT", "true").lower() in (
+    # Railway terminates TLS at its edge, so the app must NOT redirect HTTP
+    # to HTTPS -- that would break Railway's HTTP health check (it requires 2xx,
+    # a 301 counts as unhealthy).
+    SECURE_SSL_REDIRECT = os.environ.get("DJANGO_SSL_REDIRECT", "false").lower() in (
         "1",
         "true",
         "yes",
