@@ -1,5 +1,7 @@
 from django.db import models
 
+import re
+
 
 class Property(models.Model):
     """A real-estate listing, matching the shape used by the React frontend."""
@@ -93,6 +95,17 @@ class Property(models.Model):
 
     def __str__(self) -> str:
         return f"{self.reference} — {self.title}"
+
+    @property
+    def price_sort_value(self) -> int:
+        """Numeric value of the price string, used to sort by price."""
+        digits = re.sub(r"\D", "", self.price)
+        return int(digits) if digits else 0
+
+    @property
+    def image_display_url(self) -> str:
+        """URL of the uploaded file, falling back to the external URL."""
+        return self.image.url if self.image else self.image_url
 
 
 class EstimationRequest(models.Model):

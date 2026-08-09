@@ -95,7 +95,8 @@
     <nav>
       <a href="/">Accueil</a>
       {% if user.is_authenticated %}
-        <a href="{% url 'property_form_list' %}">Formulaire</a>
+        <a href="/dashboard/">Tableau de bord</a>
+        <a href="{% url 'property_form_add' %}">Ajouter un bien</a>
         <a href="/admin/">Administration</a>
         <a href="{% url 'swagger-ui' %}">API</a>
         <a href="/admin/logout/">Déconnexion ({{ user.username }})</a>

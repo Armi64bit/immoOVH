@@ -130,6 +130,30 @@ def landing(request):
 
 
 @staff_member_required
+def dashboard(request):
+    """Modern admin dashboard: properties, estimations and contact messages."""
+    properties = Property.objects.all()
+    estimations = EstimationRequest.objects.all()
+    contacts = ContactMessage.objects.all()
+
+    return render(
+        request,
+        "listings/dashboard.html",
+        {
+            "properties": properties,
+            "estimations": estimations,
+            "contacts": contacts,
+            "total_count": properties.count(),
+            "published_count": properties.filter(is_published=True).count(),
+            "vente_count": properties.filter(type="À vendre").count(),
+            "location_count": properties.filter(type="À louer").count(),
+            "estimation_count": estimations.count(),
+            "contact_count": contacts.count(),
+        },
+    )
+
+
+@staff_member_required
 def property_form_list(request):
     """List all properties with edit/delete actions."""
     properties = Property.objects.all()

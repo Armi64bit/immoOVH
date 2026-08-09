@@ -53,3 +53,24 @@ class FormSubmissionAPITests(TestCase):
             "/api/estimations/", {"name": "", "phone": ""}, format="json"
         )
         self.assertEqual(response.status_code, 400)
+
+
+class DashboardTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        User = get_user_model()
+        self.user = User.objects.create_user(
+            username="staff", password="pw", is_staff=True
+        )
+
+    def test_dashboard_requires_staff(self):
+        response = self.client.get("/dashboard/")
+        self.assertIn(response.status_code, (302, 403, 401))
+
+    def test_dashboard_renders_for_staff(self):
+        self.client.force_login(self.user)
+        response = self.client.get("/dashboard/")
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Tableau de bord")
+        self.assertContains(response, "estimations")
+        self.assertContains(response, "contacts")

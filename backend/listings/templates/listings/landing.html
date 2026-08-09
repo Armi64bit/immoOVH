@@ -9,7 +9,8 @@
     </p>
     <div class="actions">
       {% if is_staff %}
-        <a class="btn" href="{% url 'property_form_add' %}">+ Ajouter un bien</a>
+        <a class="btn" href="{% url 'dashboard' %}">Ouvrir le tableau de bord</a>
+        <a class="btn secondary" href="{% url 'property_form_add' %}">+ Ajouter un bien</a>
         <a class="btn secondary" href="{% url 'property_form_list' %}">Voir les biens</a>
         <a class="btn secondary" href="/admin/">Administration complète</a>
         <a class="btn secondary" href="{% url 'swagger-ui' %}">Documentation API</a>

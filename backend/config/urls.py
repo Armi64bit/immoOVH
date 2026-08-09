@@ -4,6 +4,7 @@ from django.contrib import admin
 from django.urls import include, path
 
 from listings.views import (
+    dashboard,
     landing,
     property_form_add_edit,
     property_form_delete,
@@ -12,6 +13,7 @@ from listings.views import (
 
 urlpatterns = [
     path("", landing, name="home"),
+    path("dashboard/", dashboard, name="dashboard"),
     path("admin/", admin.site.urls),
     # Friendly property management pages for staff
     path("biens/", property_form_list, name="property_form_list"),

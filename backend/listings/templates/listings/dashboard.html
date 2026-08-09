@@ -1,0 +1,406 @@
+{% extends "listings/base.html" %}
+{% block title %}Tableau de bord — ImmoConnect{% endblock %}
+{% block content %}
+<style>
+  main { max-width: 1320px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 16px; margin-bottom: 24px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .stat-card .num { font-size: 28px; font-weight: 800; color: var(--brand); line-height: 1.1; }
+  .stat-card .lbl { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { border: 1px solid var(--border); background: #fff; color: var(--text); padding: 9px 16px; border-radius: 999px; cursor: pointer; font-size: 14px; font-weight: 600; }
+  .tab.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+  .tab .count { opacity: .8; font-weight: 500; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+  .toolbar input[type="search"] { flex: 1; min-width: 200px; }
+  .toolbar select { width: auto; }
+  .type-filters { display: flex; gap: 6px; }
+  .type-filters button { border: 1px solid var(--border); background: #fff; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; }
+  .type-filters button.active { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .view-toggle { display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .view-toggle button { border: 0; background: #fff; padding: 8px 12px; cursor: pointer; font-size: 13px; }
+  .view-toggle button.active { background: #eef2f1; color: var(--brand); font-weight: 700; }
+  .table-wrap { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: auto; }
+  table.dtable { width: 100%; border-collapse: collapse; min-width: 900px; }
+  table.dtable th { position: sticky; top: 0; background: #fafbfc; cursor: pointer; user-select: none; white-space: nowrap; }
+  table.dtable th:hover { color: var(--brand); }
+  table.dtable th .arrow { font-size: 10px; margin-left: 4px; color: var(--brand); }
+  table.dtable td, table.dtable th { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 13.5px; vertical-align: middle; }
+  table.dtable tbody tr:hover { background: #f8faf9; }
+  .row-hidden { display: none !important; }
+  .img-thumb { width: 54px; height: 40px; object-fit: cover; border-radius: 6px; display: block; }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .tag-vente { background: #dbeafe; color: #1d4ed8; }
+  .tag-location { background: #fef3c7; color: #b45309; }
+  .tag-published { background: #dcfce7; color: #15803d; }
+  .tag-unpublished { background: #fee2e2; color: #b91c1c; }
+  .tag-dispo { background: #dcfce7; color: #15803d; }
+  .tag-reserve { background: #fef3c7; color: #b45309; }
+  .tag-vendu { background: #e5e7eb; color: #374151; }
+  .tag-loue { background: #e5e7eb; color: #374151; }
+  .tag-muted { background: #f3f4f6; color: #6b7280; }
+  .row-actions { display: flex; gap: 6px; }
+  .btn.sm { padding: 6px 10px; font-size: 12.5px; border-radius: 7px; }
+  .btn.edit { background: #f3f4f6; color: var(--text); border: 1px solid var(--border); }
+  .btn.edit:hover { background: #e5e7eb; }
+  .btn.del { background: #fee2e2; color: #b91c1c; }
+  .btn.del:hover { background: #fecaca; }
+  .cards-grid { display: none; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+  .pcard { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; }
+  .pcard img { width: 100%; height: 130px; object-fit: cover; }
+  .pcard .body { padding: 12px 14px; }
+  .pcard .title { font-weight: 700; font-size: 14.5px; margin: 6px 0 2px; }
+  .pcard .loc { color: var(--muted); font-size: 12.5px; }
+  .pcard .price { font-weight: 800; color: var(--brand); margin-top: 8px; font-size: 15px; }
+  .pcard .meta { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; }
+  .pcard .row-actions { margin-top: 6px; }
+  .muted-msg { color: var(--muted); font-size: 13px; padding: 20px; text-align: center; }
+  .empty { color: var(--muted); padding: 26px; text-align: center; font-size: 14px; }
+  .help-note { font-size: 12.5px; color: var(--muted); margin: -6px 0 14px; }
+  @media (max-width: 640px) { .toolbar { flex-direction: column; align-items: stretch; } }
+</style>
+
+<div class="stats-grid">
+  <div class="stat-card"><div class="num">{{ total_count }}</div><div class="lbl">Biens au total</div></div>
+  <div class="stat-card"><div class="num">{{ published_count }}</div><div class="lbl">Publiés sur le site</div></div>
+  <div class="stat-card"><div class="num">{{ vente_count }}</div><div class="lbl">À vendre</div></div>
+  <div class="stat-card"><div class="num">{{ location_count }}</div><div class="lbl">À louer</div></div>
+  <div class="stat-card"><div class="num">{{ estimation_count }}</div><div class="lbl">Demandes d'estimation</div></div>
+  <div class="stat-card"><div class="num">{{ contact_count }}</div><div class="lbl">Messages de contact</div></div>
+</div>
+
+<div class="tabs">
+  <button type="button" class="tab active" data-tab="biens">Biens <span class="count">({{ total_count }})</span></button>
+  <button type="button" class="tab" data-tab="estimations">Estimations <span class="count">({{ estimation_count }})</span></button>
+  <button type="button" class="tab" data-tab="contacts">Contacts <span class="count">({{ contact_count }})</span></button>
+  <a class="btn" style="margin-left:auto" href="{% url 'property_form_add' %}">+ Ajouter un bien</a>
+</div>
+
+<p class="help-note">Cliquez sur un en-tête de colonne pour trier. Utilisez la recherche et les filtres pour affiner.</p>
+
+<!-- ============================ BIENS ============================ -->
+<section class="panel active" id="panel-biens">
+  <div class="toolbar">
+    <input type="search" id="propSearch" placeholder="Rechercher (titre, référence, ville…)">
+    <div class="type-filters" id="propTypeFilters">
+      <button type="button" class="active" data-type="all">Tous</button>
+      <button type="button" data-type="À vendre">À vendre</button>
+      <button type="button" data-type="À louer">À louer</button>
+    </div>
+    <select id="propStatus">
+      <option value="all">Tous les statuts</option>
+      <option value="Disponible">Disponible</option>
+      <option value="Réservé">Réservé</option>
+      <option value="Vendu">Vendu</option>
+      <option value="Loué">Loué</option>
+    </select>
+    <div class="view-toggle" id="propViewToggle">
+      <button type="button" class="active" data-view="table">Tableau</button>
+      <button type="button" data-view="cards">Cartes</button>
+    </div>
+  </div>
+
+  <div class="table-wrap" id="propTableView">
+    <table class="dtable" id="propTable">
+      <thead>
+        <tr>
+          <th data-sort="ref">Photo</th>
+          <th data-sort="ref">Référence</th>
+          <th data-sort="title">Titre</th>
+          <th data-sort="type">Type</th>
+          <th data-sort="price">Prix</th>
+          <th data-sort="location">Localisation</th>
+          <th data-sort="status">Statut</th>
+          <th data-sort="published">Publié</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in properties %}
+        <tr
+          data-ref="{{ p.reference }}"
+          data-title="{{ p.title }}"
+          data-type="{{ p.type }}"
+          data-price="{{ p.price_sort_value }}"
+          data-location="{{ p.location }}"
+          data-status="{{ p.status }}"
+          data-published="{{ p.is_published|yesno:'1,0' }}"
+        >
+          <td>
+            {% if p.image_display_url %}
+              <img class="img-thumb" src="{{ p.image_display_url }}" alt="" loading="lazy">
+            {% else %}
+              <span class="tag-muted tag">—</span>
+            {% endif %}
+          </td>
+          <td><strong>{{ p.reference }}</strong></td>
+          <td>{{ p.title }}</td>
+          <td><span class="tag {% if p.type == 'À vendre' %}tag-vente{% else %}tag-location{% endif %}">{{ p.type }}</span></td>
+          <td><strong>{{ p.price }}</strong></td>
+          <td>{{ p.location }}</td>
+          <td><span class="tag {% if p.status == 'Disponible' %}tag-dispo{% elif p.status == 'Réservé' %}tag-reserve{% elif p.status == 'Vendu' %}tag-vendu{% elif p.status == 'Loué' %}tag-loue{% else %}tag-muted{% endif %}">{{ p.status }}</span></td>
+          <td><span class="tag {% if p.is_published %}tag-published{% else %}tag-unpublished{% endif %}">{% if p.is_published %}Oui{% else %}Non{% endif %}</span></td>
+          <td>
+            <div class="row-actions">
+              <a class="btn sm edit" href="{% url 'property_form_edit' p.pk %}">Modifier</a>
+              <form method="post" action="{% url 'property_form_delete' p.pk %}" onsubmit="return confirm('Supprimer « {{ p.title }} » ?')">
+                {% csrf_token %}
+                <button class="btn sm del" type="submit">Supprimer</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="empty">Aucun bien. <a href="{% url 'property_form_add' %}">Ajoutez le premier.</a></td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="cards-grid" id="propCardsView">
+    {% for p in properties %}
+    <article class="pcard" data-ref="{{ p.reference }}" data-type="{{ p.type }}" data-status="{{ p.status }}" data-title="{{ p.title }}" data-location="{{ p.location }}" data-price="{{ p.price_sort_value }}">
+      {% if p.image_display_url %}<img src="{{ p.image_display_url }}" alt="" loading="lazy">{% endif %}
+      <div class="body">
+        <div class="meta">
+          <span class="tag {% if p.type == 'À vendre' %}tag-vente{% else %}tag-location{% endif %}">{{ p.type }}</span>
+          <span class="tag {% if p.is_published %}tag-published{% else %}tag-unpublished{% endif %}">{% if p.is_published %}Publié{% else %}Masqué{% endif %}</span>
+          <span class="tag {% if p.status == 'Disponible' %}tag-dispo{% elif p.status == 'Réservé' %}tag-reserve{% elif p.status == 'Vendu' %}tag-vendu{% elif p.status == 'Loué' %}tag-loue{% else %}tag-muted{% endif %}">{{ p.status }}</span>
+        </div>
+        <div class="title">{{ p.title }}</div>
+        <div class="loc">{{ p.location }} · {{ p.reference }}</div>
+        <div class="price">{{ p.price }}</div>
+        <div class="row-actions">
+          <a class="btn sm edit" href="{% url 'property_form_edit' p.pk %}">Modifier</a>
+          <form method="post" action="{% url 'property_form_delete' p.pk %}" onsubmit="return confirm('Supprimer « {{ p.title }} » ?')">
+            {% csrf_token %}
+            <button class="btn sm del" type="submit">Supprimer</button>
+          </form>
+        </div>
+      </div>
+    </article>
+    {% empty %}
+    <div class="empty">Aucun bien.</div>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- ============================ ESTIMATIONS ============================ -->
+<section class="panel" id="panel-estimations">
+  <div class="toolbar">
+    <input type="search" id="estSearch" placeholder="Rechercher (nom, téléphone, zone…)">
+  </div>
+  <div class="table-wrap">
+    <table class="dtable" id="estTable">
+      <thead>
+        <tr>
+          <th data-sort="name">Nom</th>
+          <th data-sort="phone">Téléphone</th>
+          <th data-sort="email">Email</th>
+          <th data-sort="zone">Zone</th>
+          <th data-sort="ptype">Type de bien</th>
+          <th data-sort="transaction">Transaction</th>
+          <th data-sort="surface">Surface</th>
+          <th data-sort="known">Connaissance</th>
+          <th data-sort="created">Reçu le</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in estimations %}
+        <tr data-name="{{ e.name }}" data-phone="{{ e.phone }}" data-email="{{ e.email }}" data-zone="{{ e.zone }}"
+            data-ptype="{{ e.get_property_type_display }}" data-transaction="{{ e.transaction }}"
+            data-surface="{{ e.surface }}" data-known="{{ e.get_known_from_display }}"
+            data-created="{{ e.created_at|date:'c' }}">
+          <td><strong>{{ e.name }}</strong></td>
+          <td>{{ e.phone }}</td>
+          <td>{{ e.email|default:"—" }}</td>
+          <td>{{ e.zone }}</td>
+          <td>{{ e.get_property_type_display|default:"—" }}</td>
+          <td><span class="tag {% if e.transaction == 'Vente' %}tag-vente{% else %}tag-location{% endif %}">{{ e.transaction }}</span></td>
+          <td>{{ e.surface|default:"—" }}{% if e.surface %} m²{% endif %}</td>
+          <td>{{ e.get_known_from_display|default:"—" }}</td>
+          <td class="muted">{{ e.created_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="9" class="empty">Aucune demande d'estimation.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============================ CONTACTS ============================ -->
+<section class="panel" id="panel-contacts">
+  <div class="toolbar">
+    <input type="search" id="contactSearch" placeholder="Rechercher (nom, email, sujet…)">
+  </div>
+  <div class="table-wrap">
+    <table class="dtable" id="contactTable">
+      <thead>
+        <tr>
+          <th data-sort="name">Nom</th>
+          <th data-sort="phone">Téléphone</th>
+          <th data-sort="email">Email</th>
+          <th data-sort="subject">Sujet</th>
+          <th>Message</th>
+          <th data-sort="created">Reçu le</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in contacts %}
+        <tr data-name="{{ c.name }}" data-phone="{{ c.phone }}" data-email="{{ c.email }}"
+            data-subject="{{ c.subject }}" data-created="{{ c.created_at|date:'c' }}">
+          <td><strong>{{ c.name }}</strong></td>
+          <td>{{ c.phone }}</td>
+          <td>{{ c.email|default:"—" }}</td>
+          <td>{{ c.subject|default:"—" }}</td>
+          <td class="muted">{{ c.message|truncatechars:60 }}</td>
+          <td class="muted">{{ c.created_at|date:"d/m/Y H:i" }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6" class="empty">Aucun message de contact.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+(function () {
+  var root = document.querySelector('.card'); // unused, keep scope
+
+  // --- Tabs ---
+  var tabs = document.querySelectorAll('.tab[data-tab]');
+  tabs.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      tabs.forEach(function (b) { b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function (p) { p.classList.remove('active'); });
+      document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // --- Generic table sorter ---
+  function wireTable(tableId, searchId) {
+    var table = document.getElementById(tableId);
+    var tbody = table.querySelector('tbody');
+    var rows = Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    var search = document.getElementById(searchId);
+
+    function current() {
+      return Array.prototype.slice.call(tbody.querySelectorAll('tr'));
+    }
+    function sort(key, dir) {
+      var items = current();
+      items.sort(function (a, b) {
+        var av = a.dataset[key] || '';
+        var bv = b.dataset[key] || '';
+        if (!isNaN(parseFloat(av)) && !isNaN(parseFloat(bv))) {
+          return dir * (parseFloat(av) - parseFloat(bv));
+        }
+        return dir * String(av).localeCompare(String(bv), 'fr', { numeric: true });
+      });
+      items.forEach(function (tr) { tbody.appendChild(tr); });
+    }
+    table.querySelectorAll('th[data-sort]').forEach(function (th) {
+      th.addEventListener('click', function () {
+        var key = th.dataset.sort;
+        var dir = th.dataset.dir === 'asc' ? -1 : 1;
+        table.querySelectorAll('th[data-sort]').forEach(function (h) {
+          h.classList.remove('sorted'); h.innerHTML = h.innerHTML.replace(/ <span class="arrow">.*<\/span>/, '');
+        });
+        th.dataset.dir = dir === 1 ? 'asc' : 'desc';
+        th.classList.add('sorted');
+        th.insertAdjacentHTML('beforeend', ' <span class="arrow">' + (dir === 1 ? '▲' : '▼') + '</span>');
+        sort(key, dir);
+        if (search) searchRows('');
+      });
+    });
+    function searchRows(q) {
+      q = q.toLowerCase();
+      current().forEach(function (tr) {
+        var match = !q || tr.textContent.toLowerCase().indexOf(q) !== -1;
+        tr.classList.toggle('row-hidden', !match);
+      });
+    }
+    if (search) {
+      search.addEventListener('input', function () { searchRows(this.value); });
+    }
+  }
+  wireTable('estTable', 'estSearch');
+  wireTable('contactTable', 'contactSearch');
+
+  // --- Property tab: search + type filter + status filter + sort + view toggle ---
+  var propRows = [];
+  document.querySelectorAll('#propTable tbody tr').forEach(function (tr) {
+    propRows.push({ tr: tr, card: document.querySelector('#propCardsView .pcard[data-ref="' + tr.dataset.ref + '"]') });
+  });
+  var state = { type: 'all', status: 'all', q: '', view: 'table', sortKey: 'ref', sortDir: 1 };
+
+  function applyFilters() {
+    propRows.forEach(function (item) {
+      var show = (state.type === 'all' || item.tr.dataset.type === state.type) &&
+                 (state.status === 'all' || item.tr.dataset.status === state.status) &&
+                 (!state.q || (item.tr.dataset.title + ' ' + item.tr.dataset.ref + ' ' + item.tr.dataset.location + ' ' + item.tr.textContent).toLowerCase().indexOf(state.q) !== -1);
+      item.tr.classList.toggle('row-hidden', !show);
+      if (item.card) item.card.classList.toggle('row-hidden', !show);
+    });
+  }
+  function applySort() {
+    var items = propRows.filter(function (i) { return !i.tr.classList.contains('row-hidden'); });
+    var key = state.sortKey;
+    items.sort(function (a, b) {
+      var av = a.tr.dataset[key], bv = b.tr.dataset[key];
+      if (!isNaN(parseFloat(av)) && !isNaN(parseFloat(bv))) return state.sortDir * (parseFloat(av) - parseFloat(bv));
+      return state.sortDir * String(av).localeCompare(String(bv), 'fr', { numeric: true });
+    });
+    items.forEach(function (item) {
+      document.querySelector('#propTable tbody').appendChild(item.tr);
+      if (item.card) document.querySelector('#propCardsView').appendChild(item.card);
+    });
+  }
+  function rerender() { applyFilters(); applySort(); }
+
+  document.getElementById('propSearch').addEventListener('input', function () { state.q = this.value.toLowerCase(); applyFilters(); });
+
+  var typeBtns = document.querySelectorAll('#propTypeFilters button');
+  typeBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      typeBtns.forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      state.type = b.dataset.type;
+      applyFilters();
+    });
+  });
+
+  document.getElementById('propStatus').addEventListener('change', function () { state.status = this.value; applyFilters(); });
+
+  var viewBtns = document.querySelectorAll('#propViewToggle button');
+  viewBtns.forEach(function (b) {
+    b.addEventListener('click', function () {
+      viewBtns.forEach(function (x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      state.view = b.dataset.view;
+      document.getElementById('propTableView').style.display = state.view === 'table' ? '' : 'none';
+      document.getElementById('propCardsView').style.display = state.view === 'cards' ? 'grid' : 'none';
+    });
+  });
+
+  document.querySelectorAll('#propTable th[data-sort]').forEach(function (th) {
+    th.addEventListener('click', function () {
+      var key = th.dataset.sort;
+      if (key === 'ref' || key === 'published') return; // keep simple: sort by meaningful columns
+      state.sortKey = key;
+      state.sortDir = state.sortKey === key && state.sortDir === 1 ? -1 : 1;
+      document.querySelectorAll('#propTable th[data-sort]').forEach(function (h) {
+        h.innerHTML = h.innerHTML.replace(/ <span class="arrow">.*<\/span>/, '');
+      });
+      th.insertAdjacentHTML('beforeend', ' <span class="arrow">' + (state.sortDir === 1 ? '▲' : '▼') + '</span>');
+      applySort();
+    });
+  });
+})();
+</script>
+{% endblock %}
