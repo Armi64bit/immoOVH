@@ -1,2 +1,1 @@
-[providers]
-python = "3.12"
+providers = ["python"]
