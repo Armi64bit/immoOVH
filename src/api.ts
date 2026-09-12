@@ -1,12 +1,13 @@
 import type { PropertyItem } from './types'
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL || 'https://tender-determination-production.up.railway.app'
+  import.meta.env.VITE_API_URL || 'https://adminimmo.pythonanywhere.com'
 
 type ApiProperty = {
   id: number
   title: string
   type: string
+  property_type: string
   price: string
   location: string
   details: string
@@ -37,6 +38,7 @@ function mapApiProperty(p: ApiProperty): PropertyItem {
   return {
     title: p.title,
     type: p.type,
+    propertyType: p.property_type,
     price: p.price,
     location: p.location,
     details: p.details,

@@ -8,6 +8,7 @@ export type NavItem = {
 export type PropertyItem = {
   title: string
   type: string
+  propertyType: string
   price: string
   location: string
   details: string

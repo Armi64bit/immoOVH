@@ -6,6 +6,7 @@ SEED = [
     {
         "title": "Villa contemporaine",
         "type": "À vendre",
+        "property_type": "Villa / Maison",
         "price": "2 350 000 TND",
         "location": "La Marsa",
         "details": "420 m² · S+5 · Piscine",
@@ -27,6 +28,7 @@ SEED = [
     {
         "title": "Appartement S+3 lumineux",
         "type": "À vendre",
+        "property_type": "Appartement",
         "price": "580 000 TND",
         "location": "Menzah 9",
         "details": "165 m² · S+3",
@@ -48,6 +50,7 @@ SEED = [
     {
         "title": "Résidence premium",
         "type": "À louer",
+        "property_type": "Appartement",
         "price": "2 400 TND / mois",
         "location": "Lac 2",
         "details": "145 m² · S+3",
@@ -69,6 +72,7 @@ SEED = [
     {
         "title": "Penthouse vue mer",
         "type": "À vendre",
+        "property_type": "Appartement",
         "price": "3 500 000 TND",
         "location": "Carthage",
         "details": "550 m² · S+7 · Terrasse panoramique",
@@ -90,6 +94,7 @@ SEED = [
     {
         "title": "Studio moderne centre-ville",
         "type": "À louer",
+        "property_type": "Studio",
         "price": "650 TND / mois",
         "location": "Tunis (centre)",
         "details": "55 m² · S+1",
@@ -111,6 +116,7 @@ SEED = [
     {
         "title": "Maison de caractère",
         "type": "À vendre",
+        "property_type": "Villa / Maison",
         "price": "1 200 000 TND",
         "location": "Mutuelleville",
         "details": "320 m² · S+4 · Jardin",
@@ -132,6 +138,7 @@ SEED = [
     {
         "title": "Duplex spacieux",
         "type": "À louer",
+        "property_type": "Duplex / Triplex",
         "price": "1 800 TND / mois",
         "location": "Ariana",
         "details": "240 m² · S+4 + S+2",
@@ -153,6 +160,7 @@ SEED = [
     {
         "title": "Appartement de luxe",
         "type": "À vendre",
+        "property_type": "Bureau / Espace professionnel",
         "price": "950 000 TND",
         "location": "Lac 1",
         "details": "200 m² · S+3 · Ascenseur privé",
@@ -174,6 +182,7 @@ SEED = [
     {
         "title": "Terrain premium",
         "type": "À vendre",
+        "property_type": "Terrain",
         "price": "800 000 TND",
         "location": "Soukra",
         "details": "800 m² · Zone résidentielle",
@@ -195,6 +204,7 @@ SEED = [
     {
         "title": "Riad traditionnel rénové",
         "type": "À vendre",
+        "property_type": "Local commercial",
         "price": "1 850 000 TND",
         "location": "Tunis (centre)",
         "details": "380 m² · S+2 + Patio",
@@ -216,6 +226,7 @@ SEED = [
     {
         "title": "Villa moderne avec piscine",
         "type": "À louer",
+        "property_type": "Rez-de-chaussée",
         "price": "3 500 TND / mois",
         "location": "La Marsa",
         "details": "450 m² · S+5 · Piscine chauffée",
@@ -237,6 +248,7 @@ SEED = [
     {
         "title": "Appartement neuf avec balcon",
         "type": "À vendre",
+        "property_type": "Appartement",
         "price": "720 000 TND",
         "location": "Menzah 6",
         "details": "185 m² · S+3 · Balcon 40m²",

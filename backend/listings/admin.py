@@ -9,20 +9,32 @@ class PropertyAdmin(admin.ModelAdmin):
         "reference",
         "title",
         "type",
+        "property_type",
         "price",
         "location",
         "status",
         "is_published",
         "updated_at",
     ]
-    list_filter = ["type", "status", "is_published", "location"]
+    list_filter = ["type", "property_type", "status", "is_published", "location"]
     search_fields = ["reference", "title", "location", "price"]
     list_editable = ["status", "is_published"]
     ordering = ["-updated_at"]
     fieldsets = (
         (
             "Listing",
-            {"fields": ("title", "type", "price", "location", "details", "reference", "status")},
+            {
+                "fields": (
+                    "title",
+                    "type",
+                    "property_type",
+                    "price",
+                    "location",
+                    "details",
+                    "reference",
+                    "status",
+                )
+            },
         ),
         (
             "Media & Publishing",

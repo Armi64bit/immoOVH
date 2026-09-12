@@ -11,16 +11,6 @@ type Props = {
   variant?: 'page' | 'home'
 }
 
-const getPropertyCategory = (property: PropertyItem) => {
-  const title = property.title.toLowerCase()
-
-  if (title.includes('villa')) return 'Villa'
-  if (title.includes('appartement') || title.includes('studio') || title.includes('penthouse') || title.includes('duplex')) return 'Appartement'
-  if (title.includes('terrain')) return 'Terrain'
-
-  return 'Autre'
-}
-
 const getSurface = (property: PropertyItem) => {
   const match = property.details.match(/(\d+)\s*m²/)
   return match ? Number(match[1]) : 0
@@ -54,7 +44,9 @@ export default function PropertyListings({
   })
 
   const availableTypes = useMemo(() => {
-    const categories = Array.from(new Set(properties.map(getPropertyCategory)))
+    const categories = Array.from(
+      new Set(properties.map((property) => property.propertyType).filter(Boolean)),
+    )
     return ['Tous', ...categories]
   }, [properties])
 
@@ -70,7 +62,7 @@ export default function PropertyListings({
     const piecesFilter = filters.pieces === 'Tous' ? null : Number(filters.pieces)
 
     return properties.filter((property) => {
-      const matchesType = filters.type === 'Tous' || getPropertyCategory(property) === filters.type
+      const matchesType = filters.type === 'Tous' || property.propertyType === filters.type
       const matchesZone = filters.zone === 'Tous' || property.location === filters.zone
       const priceValue = getPriceValue(property)
       const matchesPrice = priceValue >= minPrice && priceValue <= maxPrice
