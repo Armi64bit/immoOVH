@@ -31,6 +31,7 @@ export default function PropertyDetail() {
   }
 
   const whatsappNumber = whatsappNumbers[0].replace(/\D/g, '')
+  const propertyDescription = property.description?.trim() || property.details
 
   return (
     <article className="page-panel property-detail">
@@ -99,7 +100,7 @@ export default function PropertyDetail() {
 
           <section className="detail-section">
             <h2>À propos de ce bien</h2>
-            <p className="property-description">{property.description || property.details}</p>
+            <p className="property-description">{propertyDescription}</p>
           </section>
 
           <section className="detail-section">

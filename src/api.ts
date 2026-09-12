@@ -58,7 +58,9 @@ function mapApiProperty(p: ApiProperty): PropertyItem {
     price: p.price,
     location: p.location,
     details: p.details,
-    description: p.description,
+    description: typeof p.description === 'string' && p.description.trim()
+      ? p.description.trim()
+      : undefined,
     reference: p.reference,
     imageUrl: p.image_display_url,
     status: p.status,
