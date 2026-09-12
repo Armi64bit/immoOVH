@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from listings.models import Property
+from listings.description_templates import build_property_description
 
 SEED = [
     {
@@ -267,10 +268,13 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         created = 0
         for item in SEED:
-            _, was_created = Property.objects.get_or_create(
+            property_obj, was_created = Property.objects.get_or_create(
                 reference=item["reference"],
                 defaults=item,
             )
+            if not property_obj.description:
+                property_obj.description = build_property_description(property_obj)
+                property_obj.save(update_fields=["description"])
             if was_created:
                 created += 1
         self.stdout.write(

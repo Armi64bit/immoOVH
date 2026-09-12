@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 
 from listings.models import Property
+from listings.description_templates import build_property_description
 
 LOCATIONS = [
     "El Menzah 9",
@@ -87,10 +88,13 @@ class Command(BaseCommand):
                 "is_published": True,
             }
 
-            _, was_created = Property.objects.update_or_create(
+            property_obj, was_created = Property.objects.update_or_create(
                 reference=reference,
                 defaults=defaults,
             )
+            if not property_obj.description:
+                property_obj.description = build_property_description(property_obj)
+                property_obj.save(update_fields=["description"])
             if was_created:
                 created += 1
             else:
