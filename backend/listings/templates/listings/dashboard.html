@@ -76,6 +76,8 @@
   .modal .specs .k { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
   .modal .specs .v { font-size: 14px; font-weight: 700; margin-top: 2px; }
   .modal .details { color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  .modal .about-label { margin: 16px 0 5px; color: var(--text); font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; }
+  .modal .about-description { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.65; white-space: pre-line; }
   .modal-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--border); }
   .modal-actions label { font-size: 12.5px; }
   .modal-actions select { width: auto; min-width: 150px; }
@@ -165,6 +167,7 @@
           data-floortype="{{ p.floor_type }}"
           data-features="{{ p.features|join:', ' }}"
           data-details="{{ p.details }}"
+          data-description="{{ p.description }}"
         >
           <td>
             {% if p.image_display_url %}
@@ -207,7 +210,7 @@
       data-area="{{ p.area|default:'' }}" data-rooms="{{ p.rooms|default:'' }}"
       data-bedrooms="{{ p.bedrooms|default:'' }}" data-bathrooms="{{ p.bathrooms|default:'' }}"
       data-floor="{{ p.floor }}" data-orientation="{{ p.orientation }}" data-years="{{ p.years }}"
-      data-floortype="{{ p.floor_type }}" data-features="{{ p.features|join:', ' }}" data-details="{{ p.details }}">
+      data-floortype="{{ p.floor_type }}" data-features="{{ p.features|join:', ' }}" data-details="{{ p.details }}" data-description="{{ p.description }}">
       {% if p.image_display_url %}<img src="{{ p.image_display_url }}" alt="" loading="lazy">{% endif %}
       <div class="body">
         <div class="meta">
@@ -328,6 +331,8 @@
         <p class="loc" id="pvLoc"></p>
         <div class="price" id="pvPrice"></div>
         <div class="specs" id="pvSpecs"></div>
+        <div class="about-label">À propos du bien</div>
+        <p class="about-description" id="pvDescription"></p>
         <p class="details" id="pvDetails"></p>
         <div class="modal-actions">
           <label>Statut
@@ -528,6 +533,7 @@
     specs += spec('Revêtement', d.floortype);
     specs += spec('Référence', d.ref);
     document.getElementById('pvSpecs').innerHTML = specs || '<div class="empty" style="grid-column:1/-1">Aucune spécification</div>';
+    document.getElementById('pvDescription').textContent = d.description || d.details || '';
     document.getElementById('pvDetails').textContent = d.details || '';
     document.getElementById('pvStatus').value = d.status;
     document.getElementById('pvPublished').checked = d.published === '1';

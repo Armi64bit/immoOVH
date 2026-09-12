@@ -21,6 +21,7 @@ class PropertyForm(forms.ModelForm):
             "price",
             "location",
             "details",
+            "description",
             "reference",
             "image",
             "image_url",
