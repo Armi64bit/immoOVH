@@ -50,6 +50,22 @@ function AppContent() {
     return () => window.clearTimeout(timer)
   }, [loading])
 
+  useEffect(() => {
+    const path = routeLocation.pathname.toLowerCase()
+    const pageTitles: Record<string, string> = {
+      '/': 'Accueil',
+      '/vente': 'Biens à vendre',
+      '/location': 'Biens à louer',
+      '/carte': 'Carte des biens',
+      '/estimation': 'Estimation',
+      '/a-propos': 'À propos',
+      '/recrutement': 'Recrutement',
+      '/contact': 'Contact',
+    }
+    const pageTitle = pageTitles[path] || (path.startsWith('/property/') ? 'Détail du bien' : 'ImmoConnect')
+    document.title = `${pageTitle} | ImmoConnect`
+  }, [routeLocation.pathname])
+
   const handleNavigate = (page: 'vente' | 'location' | 'estimation') => {
     const routes: Record<'vente' | 'location' | 'estimation', string> = {
       vente: '/Vente',
