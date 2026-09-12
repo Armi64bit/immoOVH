@@ -37,6 +37,7 @@ class PropertyAdmin(admin.ModelAdmin):
                     "price",
                     "location",
                     "details",
+                    "description",
                     "reference",
                     "status",
                 ),

@@ -58,6 +58,11 @@ class Property(models.Model):
         verbose_name="Détails",
         help_text="Ex. : 165 m² · S+3",
     )
+    description = models.TextField(
+        blank=True,
+        verbose_name="À propos du bien",
+        help_text="Description complète affichée dans la section « À propos de ce bien ».",
+    )
     reference = models.CharField(max_length=32, unique=True, verbose_name="Référence")
     image = models.ImageField(
         upload_to="properties/",

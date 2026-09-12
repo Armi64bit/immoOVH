@@ -17,6 +17,7 @@ class PropertySerializer(serializers.ModelSerializer):
             "price",
             "location",
             "details",
+            "description",
             "reference",
             "image",
             "image_url",
