@@ -16,8 +16,7 @@ export type PropertyItem = {
   reference: string
   imageUrl: string
   status: string
-  lat?: number
-  lng?: number
+  googleMapsUrl?: string
   area?: number
   rooms?: number
   bedrooms?: number

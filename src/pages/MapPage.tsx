@@ -9,34 +9,28 @@ type Props = {
 export default function MapPage({ properties }: Props) {
   const [selectedProperty, setSelectedProperty] = useState<PropertyItem | null>(null)
   const navigate = useNavigate()
-  const mappedProperties = properties.filter((property) => property.lat != null && property.lng != null)
-  const latitudes = mappedProperties.map((property) => property.lat as number)
-  const longitudes = mappedProperties.map((property) => property.lng as number)
-  const minLat = Math.min(...latitudes, 36.72)
-  const maxLat = Math.max(...latitudes, 36.92)
-  const minLng = Math.min(...longitudes, 10.08)
-  const maxLng = Math.max(...longitudes, 10.42)
-
-  const getMarkerStyle = (property: PropertyItem) => ({
-    left: `${((property.lng! - minLng) / (maxLng - minLng)) * 100}%`,
-    top: `${(1 - (property.lat! - minLat) / (maxLat - minLat)) * 100}%`,
-  })
+  const mappedProperties = properties.filter((property) => property.googleMapsUrl || property.location)
 
   const getMapEmbedUrl = () => {
-    if (selectedProperty && selectedProperty.lat && selectedProperty.lng) {
-      const { lat, lng } = selectedProperty
-      return `https://www.google.com/maps?q=${lat},${lng}&hl=fr&z=15&output=embed`
+    const mapsUrl = selectedProperty?.googleMapsUrl
+    if (mapsUrl) {
+      try {
+        const query = new URL(mapsUrl).searchParams.get('query')
+        if (query) {
+          return `https://www.google.com/maps?q=${encodeURIComponent(query)}&hl=fr&z=15&output=embed`
+        }
+      } catch {
+        // Use the text location when an imported link is malformed.
+      }
     }
-
-    return `https://www.google.com/maps?q=Tunis&hl=fr&z=10&output=embed`
+    const location = selectedProperty?.location || 'Tunis'
+    return `https://www.google.com/maps?q=${encodeURIComponent(location)}&hl=fr&z=10&output=embed`
   }
 
   const getGoogleMapsUrl = () => {
-    if (selectedProperty && selectedProperty.lat && selectedProperty.lng) {
-      const { lat, lng } = selectedProperty
-      return `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
-    }
-    return 'https://www.google.com/maps/search/?api=1&query=Tunis'
+    if (selectedProperty?.googleMapsUrl) return selectedProperty.googleMapsUrl
+    const location = selectedProperty?.location || 'Tunis'
+    return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`
   }
 
   return (

@@ -15,8 +15,7 @@ type ApiProperty = {
   reference: string
   image_display_url: string
   status: string
-  lat: number | null
-  lng: number | null
+  google_maps_url: string
   area: number | null
   rooms: number | null
   bedrooms: number | null
@@ -64,8 +63,7 @@ function mapApiProperty(p: ApiProperty): PropertyItem {
     reference: p.reference,
     imageUrl: p.image_display_url,
     status: p.status,
-    lat: p.lat ?? undefined,
-    lng: p.lng ?? undefined,
+    googleMapsUrl: p.google_maps_url || undefined,
     area: p.area ?? undefined,
     rooms: p.rooms ?? undefined,
     bedrooms: p.bedrooms ?? undefined,

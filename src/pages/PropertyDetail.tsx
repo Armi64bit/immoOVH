@@ -23,11 +23,17 @@ export default function PropertyDetail() {
   }
 
   const getMapEmbedUrl = () => {
-    if (property.lat && property.lng) {
-      const { lat, lng } = property
-      return `https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3249.123456789!2d${lng}!3d${lat}!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2z${lat}%2C${lng}!5e0!3m2!1sfr!2stn!4v1234567890`
+    if (property.googleMapsUrl) {
+      try {
+        const query = new URL(property.googleMapsUrl).searchParams.get('query')
+        if (query) {
+          return `https://www.google.com/maps?q=${encodeURIComponent(query)}&hl=fr&z=15&output=embed`
+        }
+      } catch {
+        // Use the text location when an imported link is malformed.
+      }
     }
-    return ''
+    return `https://www.google.com/maps?q=${encodeURIComponent(property.location)}&hl=fr&z=15&output=embed`
   }
 
   const whatsappNumber = whatsappNumbers[0].replace(/\D/g, '')
