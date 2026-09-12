@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom'
 import { whatsappNumbers } from '../data/siteData'
 import { useProperties } from '../PropertiesContext'
-import FloatingActions from '../components/FloatingActions'
 
 export default function PropertyDetail() {
   const { id } = useParams<{ id: string }>()
@@ -44,9 +43,9 @@ export default function PropertyDetail() {
       <header className="detail-header">
         <div className="detail-meta">
           <span className="meta-badge">{property.status}</span>
-          <span className="meta-badge">·</span>
+          <span className="meta-separator">·</span>
           <span className="meta-badge">{property.type}</span>
-          <span className="meta-badge">·</span>
+          <span className="meta-separator">·</span>
           <span className="meta-badge">{property.location}</span>
         </div>
 
@@ -83,11 +82,24 @@ export default function PropertyDetail() {
 
       <div className="detail-layout">
         <div className="detail-main">
-          <img src={property.imageUrl} alt={property.title} className="detail-image" />
+          <div className="detail-hero-media">
+            <img src={property.imageUrl} alt={property.title} className="detail-image" />
+            <div className="detail-image-overlay">
+              <span>{property.location}</span>
+              <span>{property.reference}</span>
+            </div>
+          </div>
+
+          <div className="detail-quick-stats" aria-label="Résumé du bien">
+            <div><span>Surface</span><strong>{property.area ? `${property.area} m²` : 'N/A'}</strong></div>
+            <div><span>Typologie</span><strong>{property.details.match(/S\+\d+/)?.[0] ?? 'N/A'}</strong></div>
+            <div><span>Chambres</span><strong>{property.bedrooms ?? 'N/A'}</strong></div>
+            <div><span>Salles de bain</span><strong>{property.bathrooms ?? 'N/A'}</strong></div>
+          </div>
 
           <section className="detail-section">
             <h2>À propos de ce bien</h2>
-            <p>{property.details}</p>
+            <p className="property-description">{property.description || property.details}</p>
           </section>
 
           <section className="detail-section">
@@ -118,8 +130,8 @@ export default function PropertyDetail() {
                 <span className="spec-value">{property.area ? `${property.area} m²` : (() => { const match = property.details.match(/(\d+)\s*m²/); return match ? `${match[1]} m²` : 'N/A'})()}</span>
               </div>
               <div className="spec-item">
-                <span className="spec-label">Pièces</span>
-                <span className="spec-value">{property.rooms ?? (property.details.includes('S+') ? property.details.split('·')[1]?.trim() : 'N/A')}</span>
+                <span className="spec-label">Typologie</span>
+                <span className="spec-value">{property.details.match(/S\+\d+/)?.[0] ?? (property.rooms ? `S+${Math.max(property.rooms - 1, 1)}` : 'N/A')}</span>
               </div>
               <div className="spec-item">
                 <span className="spec-label">Salles de bain</span>
@@ -138,8 +150,8 @@ export default function PropertyDetail() {
                 <span className="spec-value">{property.floorType ?? 'N/A'}</span>
               </div>
               <div className="spec-item">
-                <span className="spec-label">Années</span>
-                <span className="spec-value">{property.years ?? 'N/A'}</span>
+                <span className="spec-label">{property.type === 'À louer' ? 'État du bien' : 'Année de construction'}</span>
+                <span className="spec-value">{property.type === 'À louer' ? (property.condition ?? property.status) : (property.years ?? 'N/A')}</span>
               </div>
             </div>
           </div>
@@ -177,7 +189,6 @@ export default function PropertyDetail() {
         </aside>
       </div>
 
-      <FloatingActions numbers={whatsappNumbers} />
     </article>
   )
 }

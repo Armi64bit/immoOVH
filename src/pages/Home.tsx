@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { PropertyItem } from '../types'
+import ScrollReveal from '../components/ScrollReveal'
 
 type Props = {
   featuredProperties: PropertyItem[]
@@ -47,6 +48,7 @@ export default function Home({ featuredProperties, zones, onNavigate }: Props) {
 
     
 
+      <ScrollReveal>
       <section className="section-block">
         <div className="section-heading section-heading-space">
           <div>
@@ -58,9 +60,10 @@ export default function Home({ featuredProperties, zones, onNavigate }: Props) {
           </button>
         </div>
         <div className="card-grid">
-          {featuredProperties.map((property) => (
-            <Link key={property.title} to={`/property/${property.reference}`} className="property-card-link">
-              <article className="property-card property-card-listing">
+          {featuredProperties.map((property, index) => (
+            <ScrollReveal key={property.title} delay={index * 70}>
+              <Link to={`/property/${property.reference}`} className="property-card-link">
+                <article className="property-card property-card-listing">
                 <div className="property-card-image">
                   <img src={property.imageUrl} alt={property.title} />
                   <span className="property-status">{property.status}</span>
@@ -73,12 +76,15 @@ export default function Home({ featuredProperties, zones, onNavigate }: Props) {
                   <p className="property-meta">{property.details}</p>
                 </div>
                 <div className="property-price">{property.price}</div>
-              </article>
-            </Link>
+                </article>
+              </Link>
+            </ScrollReveal>
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal delay={100}>
       <section className="section-block section-zones">
         <div className="zone-header">
           <div>
@@ -95,7 +101,9 @@ export default function Home({ featuredProperties, zones, onNavigate }: Props) {
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal delay={150}>
       <section className="estimation-banner">
         <div>
           <p className="eyebrow">Estimation</p>
@@ -106,6 +114,7 @@ export default function Home({ featuredProperties, zones, onNavigate }: Props) {
           Estimer mon bien
         </button>
       </section>
+      </ScrollReveal>
     </>
   )
 }

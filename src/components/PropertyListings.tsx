@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { PropertyItem } from '../types'
+import ScrollReveal from './ScrollReveal'
 
 type Props = {
   title: string
@@ -147,9 +148,10 @@ export default function PropertyListings({
           )}
 
           <div className="card-grid">
-            {filteredProperties.map((property) => (
-              <Link key={property.title} to={`/property/${property.reference}`} className="property-card-link">
-                <article className="property-card property-card-listing">
+            {filteredProperties.map((property, index) => (
+              <ScrollReveal key={property.title} delay={index * 70}>
+                <Link to={`/property/${property.reference}`} className="property-card-link">
+                  <article className="property-card property-card-listing">
                   <div className="property-card-image">
                     <img src={property.imageUrl} alt={property.title} />
                     <span className="property-status">{property.status}</span>
@@ -162,8 +164,9 @@ export default function PropertyListings({
                     <p className="property-meta">{property.details}</p>
                   </div>
                   <div className="property-price">{property.price}</div>
-                </article>
-              </Link>
+                  </article>
+                </Link>
+              </ScrollReveal>
             ))}
           </div>
         </section>
@@ -176,9 +179,10 @@ export default function PropertyListings({
             </div>
           </div>
           <div className="card-grid">
-            {filteredProperties.map((property) => (
-              <Link key={property.title} to={`/property/${property.reference}`} className="property-card-link">
-                <article className="property-card property-card-listing">
+            {filteredProperties.map((property, index) => (
+              <ScrollReveal key={property.title} delay={index * 70}>
+                <Link to={`/property/${property.reference}`} className="property-card-link">
+                  <article className="property-card property-card-listing">
                   <div className="property-card-image">
                     <img src={property.imageUrl} alt={property.title} />
                     <span className="property-status">{property.status}</span>
@@ -191,8 +195,9 @@ export default function PropertyListings({
                     <p className="property-meta">{property.details}</p>
                   </div>
                   <div className="property-price">{property.price}</div>
-                </article>
-              </Link>
+                  </article>
+                </Link>
+              </ScrollReveal>
             ))}
           </div>
         </section>

@@ -11,6 +11,7 @@ type ApiProperty = {
   price: string
   location: string
   details: string
+  description?: string
   reference: string
   image_display_url: string
   status: string
@@ -23,6 +24,7 @@ type ApiProperty = {
   floor: string
   orientation: string
   years: string
+  condition?: string
   floor_type: string
   features: string[]
 }
@@ -56,6 +58,7 @@ function mapApiProperty(p: ApiProperty): PropertyItem {
     price: p.price,
     location: p.location,
     details: p.details,
+    description: p.description,
     reference: p.reference,
     imageUrl: p.image_display_url,
     status: p.status,
@@ -68,6 +71,7 @@ function mapApiProperty(p: ApiProperty): PropertyItem {
     floor: p.floor || undefined,
     orientation: p.orientation || undefined,
     years: p.years || undefined,
+    condition: p.condition || undefined,
     floorType: p.floor_type || undefined,
     features: p.features ?? [],
   }

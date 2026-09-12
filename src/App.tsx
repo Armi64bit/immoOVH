@@ -1,17 +1,18 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
 import Header from './components/Header'
 import Footer from './components/Footer'
-import FloatingActions from './components/FloatingActions'
 import Home from './pages/Home'
 import Listing from './pages/Listing'
 import MapPage from './pages/MapPage'
 import Estimation from './pages/Estimation'
 import Contact from './pages/Contact'
+import About from './pages/About'
 import Recrutement from './pages/Recrutement'
 import PropertyDetail from './pages/PropertyDetail'
 import { PropertiesProvider, useProperties } from './PropertiesContext'
-import { navItems, zones, whatsappNumbers } from './data/siteData'
+import { navItems, zones } from './data/siteData'
 
 function LoadingState() {
   return (
@@ -38,7 +39,16 @@ function ErrorState({ message }: { message: string }) {
 
 function AppContent() {
   const navigate = useNavigate()
-  const { properties, vente, location, loading, error } = useProperties()
+  const routeLocation = useLocation()
+  const { properties, vente, location: rentalProperties, loading, error } = useProperties()
+  const [preloaderVisible, setPreloaderVisible] = useState(true)
+
+  useEffect(() => {
+    if (loading) return
+
+    const timer = window.setTimeout(() => setPreloaderVisible(false), 450)
+    return () => window.clearTimeout(timer)
+  }, [loading])
 
   const handleNavigate = (page: 'vente' | 'location' | 'estimation') => {
     const routes: Record<'vente' | 'location' | 'estimation', string> = {
@@ -52,6 +62,13 @@ function AppContent() {
 
   return (
     <div className="app-shell">
+      {preloaderVisible && (
+        <div className={`preloader${loading ? '' : ' is-exiting'}`} role="status" aria-live="polite">
+          <div className="preloader-mark">IC</div>
+          <div className="preloader-line"><span /></div>
+          <p>Préparation de votre sélection</p>
+        </div>
+      )}
       <Header
         activePage="accueil"
         navItems={navItems}
@@ -65,20 +82,22 @@ function AppContent() {
         ) : error ? (
           <ErrorState message={error} />
         ) : (
-          <Routes>
-            <Route path="/" element={<Home featuredProperties={properties} zones={zones} onNavigate={handleNavigate} />} />
-            <Route path="/Vente" element={<Listing title="Biens à vendre" subtitle="Explorez des propriétés soigneusement sélectionnées." properties={vente} />} />
-            <Route path="/Location" element={<Listing title="Biens à louer" subtitle="Des locations élégantes pour un quotidien premium." properties={location} />} />
-            <Route path="/Carte" element={<MapPage properties={properties} />} />
-            <Route path="/Estimation" element={<Estimation />} />
-            <Route path="/Recrutement" element={<Recrutement />} />
-            <Route path="/Contact" element={<Contact />} />
-            <Route path="/property/:id" element={<PropertyDetail />} />
-          </Routes>
+          <div key={routeLocation.pathname} className="route-transition">
+            <Routes>
+              <Route path="/" element={<Home featuredProperties={properties} zones={zones} onNavigate={handleNavigate} />} />
+              <Route path="/Vente" element={<Listing title="Biens à vendre" subtitle="Explorez des propriétés soigneusement sélectionnées." properties={vente} />} />
+              <Route path="/Location" element={<Listing title="Biens à louer" subtitle="Des locations élégantes pour un quotidien premium." properties={rentalProperties} />} />
+              <Route path="/Carte" element={<MapPage properties={properties} />} />
+              <Route path="/Estimation" element={<Estimation />} />
+              <Route path="/A-propos" element={<About />} />
+              <Route path="/Recrutement" element={<Recrutement />} />
+              <Route path="/Contact" element={<Contact />} />
+              <Route path="/property/:id" element={<PropertyDetail />} />
+            </Routes>
+          </div>
         )}
       </main>
 
-      <FloatingActions numbers={whatsappNumbers} />
       <Footer />
     </div>
   )

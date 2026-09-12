@@ -6,7 +6,7 @@ export const navItems: NavItem[] = [
   { key: 'location', label: 'Location' },
   { key: 'carte', label: 'Carte' },
   { key: 'estimation', label: 'Estimation' },
-  { key: 'recrutement', label: 'Recrutement' },
+  { key: 'a-propos', label: 'À propos' },
   { key: 'contact', label: 'Contact' },
 ]
 

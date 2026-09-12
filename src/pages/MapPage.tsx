@@ -9,6 +9,18 @@ type Props = {
 export default function MapPage({ properties }: Props) {
   const [selectedProperty, setSelectedProperty] = useState<PropertyItem | null>(null)
   const navigate = useNavigate()
+  const mappedProperties = properties.filter((property) => property.lat != null && property.lng != null)
+  const latitudes = mappedProperties.map((property) => property.lat as number)
+  const longitudes = mappedProperties.map((property) => property.lng as number)
+  const minLat = Math.min(...latitudes, 36.72)
+  const maxLat = Math.max(...latitudes, 36.92)
+  const minLng = Math.min(...longitudes, 10.08)
+  const maxLng = Math.max(...longitudes, 10.42)
+
+  const getMarkerStyle = (property: PropertyItem) => ({
+    left: `${((property.lng! - minLng) / (maxLng - minLng)) * 100}%`,
+    top: `${(1 - (property.lat! - minLat) / (maxLat - minLat)) * 100}%`,
+  })
 
   const getMapEmbedUrl = () => {
     if (selectedProperty && selectedProperty.lat && selectedProperty.lng) {
@@ -47,6 +59,20 @@ export default function MapPage({ properties }: Props) {
             referrerPolicy="no-referrer-when-downgrade"
             title="Carte des biens"
           />
+          <div className="map-property-markers" aria-label="Biens géolocalisés">
+            {mappedProperties.map((property) => (
+              <button
+                key={property.reference}
+                type="button"
+                className={`map-property-marker ${selectedProperty?.reference === property.reference ? 'active' : ''}`}
+                style={getMarkerStyle(property)}
+                aria-label={`Voir ${property.title}`}
+                onClick={() => setSelectedProperty(property)}
+              >
+                <span className="pin-icon">📍</span>
+              </button>
+            ))}
+          </div>
           {selectedProperty && (
             <>
               <div
@@ -60,26 +86,27 @@ export default function MapPage({ properties }: Props) {
                   }
                 }}
               >
+                <img src={selectedProperty.imageUrl} alt="" className="map-selected-image" />
                 <div>
                   <strong>{selectedProperty.title}</strong>
                   <p className="selected-location">{selectedProperty.location}</p>
                 </div>
                 <div className="selected-price">{selectedProperty.price}</div>
               </div>
-              <div className="map-open-link">
-                <a
-                  href={getGoogleMapsUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Voir dans Google Maps
-                </a>
-              </div>
             </>
           )}
+          <div className="map-open-link">
+            <a
+              href={getGoogleMapsUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Ouvrir dans Google Maps
+            </a>
+          </div>
           <div className="map-markers-info">
             <p className="markers-legend">
-              <span className="marker-pin">📍</span> {properties.filter(p => p.lat && p.lng).length} biens sur la carte
+              <span className="marker-pin">📍</span> {mappedProperties.length} biens géolocalisés
             </p>
           </div>
         </div>

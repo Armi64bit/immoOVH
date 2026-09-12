@@ -40,6 +40,7 @@ class Property(models.Model):
     price = models.CharField(max_length=64)
     location = models.CharField(max_length=128)
     details = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
     reference = models.CharField(max_length=32, unique=True)
     image = models.ImageField(
         upload_to="properties/",
@@ -66,6 +67,7 @@ class Property(models.Model):
     floor = models.CharField(max_length=64, blank=True)
     orientation = models.CharField(max_length=64, blank=True)
     years = models.CharField(max_length=64, blank=True)
+    condition = models.CharField(max_length=128, blank=True)
     floor_type = models.CharField(max_length=64, blank=True)
 
     features = models.JSONField(default=list, blank=True)

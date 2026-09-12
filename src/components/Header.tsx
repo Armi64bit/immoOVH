@@ -21,6 +21,7 @@ export default function Header({ navItems, onEstimateClick }: Props) {
     if (path.includes('location')) return 'location'
     if (path.includes('carte')) return 'carte'
     if (path.includes('estimation')) return 'estimation'
+    if (path.includes('a-propos')) return 'a-propos'
     if (path.includes('contact')) return 'contact'
     return 'accueil'
   }
@@ -38,6 +39,7 @@ export default function Header({ navItems, onEstimateClick }: Props) {
       location: '/Location',
       carte: '/Carte',
       estimation: '/Estimation',
+      'a-propos': '/A-propos',
       recrutement: '/Recrutement',
       contact: '/Contact'
     }

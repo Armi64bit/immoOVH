@@ -41,7 +41,7 @@ export default function Contact() {
         <p className="contact-copy">Notre équipe est à votre écoute du lundi au samedi.</p>
         <div className="office-card">
           <h3>Notre bureau</h3>
-          <p>Bureau 25, Centre X, Menzah 9, Tunis 1013</p>
+          <p>Centre X, El Menzah 9, Tunis</p>
           <a href="mailto:contact@immoconnect.tn">contact@immoconnect.tn</a>
           <a href="tel:+21622132278">+216 22 13 22 78</a>
 

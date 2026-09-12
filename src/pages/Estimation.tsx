@@ -163,9 +163,10 @@ export default function Estimation() {
               required
             >
               <option value="">—</option>
-              <option value="search">Moteur de recherche</option>
-              <option value="social">Réseaux sociaux</option>
-              <option value="referral">Recommandation</option>
+              <option value="social">Réseaux sociaux (Facebook/Instagram)</option>
+              <option value="search">Recherche Google</option>
+              <option value="referral">Bouche-à-oreille / Recommandation</option>
+              <option value="agency-sign">Panneau / Enseigne de l'agence</option>
               <option value="other">Autre</option>
             </select>
           </div>
