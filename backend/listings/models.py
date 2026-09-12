@@ -84,8 +84,12 @@ class Property(models.Model):
         verbose_name="Statut",
     )
 
-    lat = models.FloatField(null=True, blank=True, verbose_name="Latitude")
-    lng = models.FloatField(null=True, blank=True, verbose_name="Longitude")
+    google_maps_url = models.URLField(
+        max_length=500,
+        blank=True,
+        verbose_name="Lien Google Maps",
+        help_text="Collez le lien Google Maps vers l'emplacement du bien.",
+    )
     area = models.PositiveIntegerField(
         null=True, blank=True, verbose_name="Surface (m²)"
     )

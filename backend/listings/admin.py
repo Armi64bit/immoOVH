@@ -68,8 +68,8 @@ class PropertyAdmin(admin.ModelAdmin):
             },
         ),
         (
-            "Position GPS",
-            {"fields": ("lat", "lng"), "classes": ("collapse",)},
+            "Localisation",
+            {"fields": ("google_maps_url",), "classes": ("collapse",)},
         ),
         (
             "Dates",

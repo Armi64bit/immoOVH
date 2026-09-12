@@ -36,13 +36,13 @@ class PropertyForm(forms.ModelForm):
             "years",
             "floor_type",
             "features",
-            "lat",
-            "lng",
+            "google_maps_url",
         ]
         widgets = {
             "details": forms.TextInput(attrs={"placeholder": "Ex. : 165 m² · S+3"}),
             "price": forms.TextInput(attrs={"placeholder": "Ex. : 580 000 TND"}),
             "image_url": forms.URLInput(attrs={"placeholder": "https://..."}),
+            "google_maps_url": forms.URLInput(attrs={"placeholder": "https://maps.google.com/..."}),
         }
 
     def clean_features(self):
