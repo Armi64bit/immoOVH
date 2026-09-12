@@ -13,6 +13,17 @@ class Property(models.Model):
         (TYPE_RENT, "À louer"),
     ]
 
+    PROPERTY_TYPE_CHOICES = [
+        ("Appartement", "Appartement"),
+        ("Villa / Maison", "Villa / Maison"),
+        ("Duplex / Triplex", "Duplex / Triplex"),
+        ("Rez-de-chaussée", "Rez-de-chaussée"),
+        ("Studio", "Studio"),
+        ("Bureau / Espace professionnel", "Bureau / Espace professionnel"),
+        ("Local commercial", "Local commercial"),
+        ("Terrain", "Terrain"),
+    ]
+
     STATUS_AVAILABLE = "Disponible"
     STATUS_CHOICES = [
         (STATUS_AVAILABLE, "Disponible"),
@@ -28,6 +39,12 @@ class Property(models.Model):
         default=TYPE_SALE,
         verbose_name="Type",
         help_text="À vendre ou à louer.",
+    )
+    property_type = models.CharField(
+        max_length=64,
+        choices=PROPERTY_TYPE_CHOICES,
+        default="Appartement",
+        verbose_name="Type de bien",
     )
     price = models.CharField(
         max_length=64,

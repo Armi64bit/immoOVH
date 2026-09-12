@@ -13,6 +13,7 @@ class PropertySerializer(serializers.ModelSerializer):
             "id",
             "title",
             "type",
+            "property_type",
             "price",
             "location",
             "details",

@@ -11,6 +11,7 @@ class PropertyAdmin(admin.ModelAdmin):
         "reference",
         "title",
         "type",
+        "property_type",
         "price",
         "location",
         "status",
@@ -18,7 +19,7 @@ class PropertyAdmin(admin.ModelAdmin):
         "updated_at",
     ]
     list_display_links = ["reference", "title"]
-    list_filter = ["type", "status", "is_published", "location"]
+    list_filter = ["type", "property_type", "status", "is_published", "location"]
     search_fields = ["reference", "title", "location", "price"]
     list_editable = ["status", "is_published"]
     list_per_page = 25
@@ -29,7 +30,16 @@ class PropertyAdmin(admin.ModelAdmin):
         (
             "Informations principales",
             {
-                "fields": ("title", "type", "price", "location", "details", "reference", "status"),
+                "fields": (
+                    "title",
+                    "type",
+                    "property_type",
+                    "price",
+                    "location",
+                    "details",
+                    "reference",
+                    "status",
+                ),
                 "description": "Les informations affichées sur la fiche du bien sur le site.",
             },
         ),
