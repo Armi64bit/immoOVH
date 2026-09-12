@@ -34,11 +34,25 @@ type ApiListResponse = {
   results: ApiProperty[]
 }
 
+function getPropertyType(property: ApiProperty): string {
+  if (property.property_type) return property.property_type
+
+  const title = property.title.toLowerCase()
+  if (title.includes('bureau')) return 'Bureau / Espace professionnel'
+  if (title.includes('local commercial')) return 'Local commercial'
+  if (title.includes('duplex') || title.includes('triplex')) return 'Duplex / Triplex'
+  if (title.includes('rez-de-chaussée')) return 'Rez-de-chaussée'
+  if (title.includes('studio')) return 'Studio'
+  if (title.includes('terrain')) return 'Terrain'
+  if (title.includes('villa') || title.includes('maison') || title.includes('riad')) return 'Villa / Maison'
+  return 'Appartement'
+}
+
 function mapApiProperty(p: ApiProperty): PropertyItem {
   return {
     title: p.title,
     type: p.type,
-    propertyType: p.property_type,
+    propertyType: getPropertyType(p),
     price: p.price,
     location: p.location,
     details: p.details,
