@@ -1824,7 +1824,7 @@ width: 140%;
 .map-open-link {
   position: absolute;
   top: 1.5rem;
-  left: 1.5rem;
+  right: 1.5rem;
   z-index: 8;
 }
 
@@ -1865,7 +1865,7 @@ width: 140%;
 
 .map-markers-info {
   position: absolute;
-  top: 1.5rem;
+  top: 5.5rem;
   right: 1.5rem;
   background: rgba(8, 7, 6, 0.95);
   border: 1px solid rgba(201, 168, 76, 0.3);
@@ -1879,9 +1879,6 @@ width: 140%;
   margin: 0;
   color: var(--text-strong);
   font-size: 0.9rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
 }
 
 .marker-pin {

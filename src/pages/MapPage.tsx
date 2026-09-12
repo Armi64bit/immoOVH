@@ -59,20 +59,6 @@ export default function MapPage({ properties }: Props) {
             referrerPolicy="no-referrer-when-downgrade"
             title="Carte des biens"
           />
-          <div className="map-property-markers" aria-label="Biens géolocalisés">
-            {mappedProperties.map((property) => (
-              <button
-                key={property.reference}
-                type="button"
-                className={`map-property-marker ${selectedProperty?.reference === property.reference ? 'active' : ''}`}
-                style={getMarkerStyle(property)}
-                aria-label={`Voir ${property.title}`}
-                onClick={() => setSelectedProperty(property)}
-              >
-                <span className="pin-icon">📍</span>
-              </button>
-            ))}
-          </div>
           {selectedProperty && (
             <>
               <div
@@ -106,7 +92,7 @@ export default function MapPage({ properties }: Props) {
           </div>
           <div className="map-markers-info">
             <p className="markers-legend">
-              <span className="marker-pin">📍</span> {mappedProperties.length} biens géolocalisés
+              {mappedProperties.length} biens géolocalisés
             </p>
           </div>
         </div>
