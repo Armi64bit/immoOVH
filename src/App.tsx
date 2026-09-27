@@ -11,6 +11,7 @@ import Contact from './pages/Contact'
 import About from './pages/About'
 import Recrutement from './pages/Recrutement'
 import PropertyDetail from './pages/PropertyDetail'
+import Seo from './components/Seo'
 import { PropertiesProvider, useProperties } from './PropertiesContext'
 import { navItems, zones } from './data/siteData'
 
@@ -50,22 +51,6 @@ function AppContent() {
     return () => window.clearTimeout(timer)
   }, [loading])
 
-  useEffect(() => {
-    const path = routeLocation.pathname.toLowerCase()
-    const pageTitles: Record<string, string> = {
-      '/': 'Accueil',
-      '/vente': 'Biens à vendre',
-      '/location': 'Biens à louer',
-      '/carte': 'Carte des biens',
-      '/estimation': 'Estimation',
-      '/a-propos': 'À propos',
-      '/recrutement': 'Recrutement',
-      '/contact': 'Contact',
-    }
-    const pageTitle = pageTitles[path] || (path.startsWith('/property/') ? 'Détail du bien' : 'ImmoConnect')
-    document.title = `${pageTitle} | ImmoConnect`
-  }, [routeLocation.pathname])
-
   const handleNavigate = (page: 'vente' | 'location' | 'estimation') => {
     const routes: Record<'vente' | 'location' | 'estimation', string> = {
       vente: '/Vente',
@@ -78,6 +63,7 @@ function AppContent() {
 
   return (
     <div className="app-shell">
+      <Seo />
       {preloaderVisible && (
         <div className={`preloader${loading ? '' : ' is-exiting'}`} role="status" aria-live="polite">
           <div className="preloader-mark">IC</div>
