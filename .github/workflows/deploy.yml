@@ -20,11 +20,9 @@ jobs:
 
       - run: npm ci
 
-      - name: Set Git identity
+      - name: Deploy to gh-pages
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-      - run: npm run deploy
+          git remote set-url origin "https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          npm run deploy -- -u "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
