@@ -162,6 +162,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LOGIN_URL = "/admin/login/"
 LOGIN_REDIRECT_URL = "https://adminimmo.pythonanywhere.com/"
 LOGOUT_REDIRECT_URL = LOGIN_URL
+ADMIN_DASHBOARD_URL = "https://adminimmo.pythonanywhere.com/dashboard/"
 
 # ---------------------------------------------------------------------------
 # Static files (served via Whitenoise, no external storage needed)

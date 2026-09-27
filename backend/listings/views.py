@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
+from django.conf import settings
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -180,7 +181,7 @@ def property_form_add_edit(request, pk=None):
                 messages.success(request, "Le bien a été mis à jour.")
             else:
                 messages.success(request, "Le bien a été créé.")
-            return redirect("property_form_list")
+            return redirect(settings.ADMIN_DASHBOARD_URL)
     else:
         form = PropertyForm(instance=instance)
 
@@ -198,6 +199,7 @@ def property_form_delete(request, pk):
     if request.method == "POST":
         property_obj.delete()
         messages.success(request, "Le bien a été supprimé.")
+        return redirect(settings.ADMIN_DASHBOARD_URL)
     return redirect("property_form_list")
 
 

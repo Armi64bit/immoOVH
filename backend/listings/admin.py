@@ -1,4 +1,6 @@
+from django.conf import settings
 from django.contrib import admin
+from django.http import HttpResponseRedirect
 from django.utils.html import format_html
 
 from .models import ContactMessage, EstimationRequest, Property
@@ -78,6 +80,24 @@ class PropertyAdmin(admin.ModelAdmin):
     )
 
     actions = ["publish_properties", "unpublish_properties"]
+
+    def response_add(self, request, obj, post_url_continue=None):
+        super().response_add(request, obj, post_url_continue)
+        return HttpResponseRedirect(settings.ADMIN_DASHBOARD_URL)
+
+    def response_change(self, request, obj):
+        super().response_change(request, obj)
+        return HttpResponseRedirect(settings.ADMIN_DASHBOARD_URL)
+
+    def response_delete(self, request, obj_display, obj_id):
+        super().response_delete(request, obj_display, obj_id)
+        return HttpResponseRedirect(settings.ADMIN_DASHBOARD_URL)
+
+    def changelist_view(self, request, extra_context=None):
+        response = super().changelist_view(request, extra_context=extra_context)
+        if request.method == "POST" and response.status_code == 302:
+            return HttpResponseRedirect(settings.ADMIN_DASHBOARD_URL)
+        return response
 
     @admin.display(description="Photo")
     def image_preview(self, obj):

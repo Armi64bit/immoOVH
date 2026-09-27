@@ -115,6 +115,130 @@ class DashboardTests(TestCase):
         self.assertContains(response, "adminlte")
 
 
+class PropertyRedirectTests(TestCase):
+    dashboard_url = "https://adminimmo.pythonanywhere.com/dashboard/"
+
+    def setUp(self):
+        user = get_user_model().objects.create_user(
+            username="staff", password="pw", is_staff=True
+        )
+        self.client.force_login(user)
+
+    def form_data(self, reference, title="Test property"):
+        return {
+            "title": title,
+            "type": "À vendre",
+            "price": "100 TND",
+            "location": "Tunis",
+            "reference": reference,
+            "status": "Disponible",
+            "is_published": "on",
+        }
+
+    def assert_dashboard_redirect(self, response):
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.dashboard_url)
+
+    def test_property_creation_redirects_to_dashboard(self):
+        response = self.client.post(
+            "/biens/nouveau/", self.form_data("IC-CREATE")
+        )
+        self.assert_dashboard_redirect(response)
+
+    def test_property_update_redirects_to_dashboard(self):
+        prop = Property.objects.create(
+            title="Original", type="À vendre", price="100 TND",
+            location="Tunis", reference="IC-UPDATE",
+        )
+        response = self.client.post(
+            "/biens/%d/" % prop.pk,
+            self.form_data("IC-UPDATE", title="Updated"),
+        )
+        self.assert_dashboard_redirect(response)
+
+    def test_property_delete_redirects_to_dashboard(self):
+        prop = Property.objects.create(
+            title="To delete", type="À vendre", price="100 TND",
+            location="Tunis", reference="IC-DELETE",
+        )
+        response = self.client.post("/biens/%d/supprimer/" % prop.pk)
+        self.assert_dashboard_redirect(response)
+        self.assertFalse(Property.objects.filter(pk=prop.pk).exists())
+
+
+class PropertyAdminRedirectTests(TestCase):
+    dashboard_url = "https://adminimmo.pythonanywhere.com/dashboard/"
+
+    def setUp(self):
+        user = get_user_model().objects.create_superuser(
+            username="boss", password="pw", email="boss@example.com"
+        )
+        self.client.force_login(user)
+
+    def admin_form_data(self, reference, title="Admin property"):
+        return {
+            "title": title,
+            "type": "À vendre",
+            "property_type": "Appartement",
+            "price": "100 TND",
+            "location": "Tunis",
+            "details": "",
+            "description": "",
+            "reference": reference,
+            "image_url": "",
+            "status": "Disponible",
+            "google_maps_url": "",
+            "area": "",
+            "rooms": "",
+            "bedrooms": "",
+            "bathrooms": "",
+            "floor": "",
+            "orientation": "",
+            "years": "",
+            "floor_type": "",
+            "features": "[]",
+            "is_published": "on",
+            "_save": "Save",
+        }
+
+    def assert_dashboard_redirect(self, response):
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, self.dashboard_url)
+
+    def test_admin_property_create_update_and_delete_redirect_to_dashboard(self):
+        response = self.client.post(
+            "/admin/listings/property/add/", self.admin_form_data("IC-ADMIN")
+        )
+        self.assert_dashboard_redirect(response)
+        prop = Property.objects.get(reference="IC-ADMIN")
+        prop.is_published = False
+        prop.save(update_fields=["is_published"])
+
+        response = self.client.post(
+            "/admin/listings/property/",
+            {
+                "action": "publish_properties",
+                "_selected_action": str(prop.pk),
+                "index": "0",
+            },
+        )
+        self.assert_dashboard_redirect(response)
+        prop.refresh_from_db()
+        self.assertTrue(prop.is_published)
+
+        response = self.client.post(
+            "/admin/listings/property/%d/change/" % prop.pk,
+            self.admin_form_data("IC-ADMIN", title="Updated admin property"),
+        )
+        self.assert_dashboard_redirect(response)
+
+        response = self.client.post(
+            "/admin/listings/property/%d/delete/" % prop.pk,
+            {"post": "yes"},
+        )
+        self.assert_dashboard_redirect(response)
+        self.assertFalse(Property.objects.filter(pk=prop.pk).exists())
+
 class AdminAuthenticationTests(TestCase):
     def setUp(self):
         self.user = get_user_model().objects.create_superuser(
