@@ -113,3 +113,28 @@ class DashboardTests(TestCase):
         response = self.client.get("/admin/")
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "adminlte")
+
+
+class AdminAuthenticationTests(TestCase):
+    def setUp(self):
+        self.user = get_user_model().objects.create_superuser(
+            username="boss", password="pw", email="boss@example.com"
+        )
+
+    def test_admin_login_redirects_to_configured_url(self):
+        response = self.client.post(
+            "/admin/login/",
+            {"username": "boss", "password": "pw", "next": "/admin/"},
+        )
+        self.assertRedirects(
+            response,
+            "https://adminimmo.pythonanywhere.com/",
+            fetch_redirect_response=False,
+        )
+
+    def test_admin_logout_ends_session(self):
+        self.client.force_login(self.user)
+        response = self.client.post("/admin/logout/")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, "/admin/login/")
+        self.assertNotIn("_auth_user_id", self.client.session)
