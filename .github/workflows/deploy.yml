@@ -1,11 +1,11 @@
-name: Build and publish frontend
+name: Deploy frontend to OVH
 
 on:
   push:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   deploy:
@@ -19,10 +19,13 @@ jobs:
           cache: npm
 
       - run: npm ci
+      - run: npm run build
 
-      - name: Deploy to gh-pages
-        run: |
-          git remote set-url origin "https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          npm run deploy -- -u "github-actions-bot <support+actions@github.com>"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload site to OVH
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.6
+        with:
+          server: ${{ secrets.OVH_FTP_SERVER }}
+          username: ${{ secrets.OVH_FTP_USERNAME }}
+          password: ${{ secrets.OVH_FTP_PASSWORD }}
+          server-dir: ./www/dist/
+          local-dir: ./dist/
